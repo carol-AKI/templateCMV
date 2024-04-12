@@ -18,7 +18,11 @@ import Calendar from "./scenes/calendar/calendar";
 import Personal from "./scenes/personal";
 import Verification from "./scenes/Verification"
 import VehicleDetail from "./scenes/VehicleDetail"
-
+import Fuel from "./scenes/Fuel"
+import Insurance from "./scenes/insurance";
+import TechnicalControl from "./scenes/TechnicalControl";
+import Maintenance from "./scenes/Maintenance";
+import Operation from "./scenes/Operation";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -46,6 +50,11 @@ function App() {
               <Route path="/Personal" element={<Personal/>} />
               <Route path="/Verification" element={<Verification/>} />
               <Route path="/VehicleDetail" element={<VehicleDetail/>} />
+              <Route path="/Fuel" element={<Fuel/>} />
+              <Route path="/Insurance" element={<Insurance/>} />
+              <Route path="/Technical Control" element={<TechnicalControl/>} />
+              <Route path="/Maintenance" element={<Maintenance/>} />
+              <Route path="/operation" element={<Operation/>} />
             </Routes>
           </main>
         </div>

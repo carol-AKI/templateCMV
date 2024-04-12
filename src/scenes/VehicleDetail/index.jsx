@@ -1,98 +1,100 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Menu,
-  MenuItem,
-} from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
-import Header from "../../components/Header";
-import { useTheme } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import React from 'react';
 
 const VehicleDetail = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const [open, setOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedRowId, setSelectedRowId] = useState(null);
+  const rows = [
+    { id: 1, colonne1: '',
+     colonne2: '',colonne3: '',
+     colonne4: '',colonne5: '',
+     colonne6: '',colonne7: '',
+     colonne8: '',colonne9: '',
+     colonne10: '',colonne11: ' ',
+  }
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedRowId(null);
-  };
-
-  const handleActionClick = (action) => {
-    console.log(`Clicked on ${action} for row with id: ${selectedRowId}`);
-    handleMenuClose();
-  };
-
-  const columns = [
-    { field: "registrarId", headerName: "Vehicle ID" },
-    { field: "name", headerName: "Make", flex: 1, cellClassName: "name-column--cell" },
-    { field: "email", headerName: "Model", flex: 1 },
-    { field: "address", headerName: "License Plate", flex: 1 },
-    { field: "phone", headerName: "Car Chassis Number", flex: 1 },
-    { field: "column6", headerName: "Column 6", flex: 1 },
-    { field: "column7", headerName: "Column 7", flex: 1 },
-    { field: "column8", headerName: "Column 8", flex: 1 },
-    { field: "column9", headerName: "Column 9", flex: 1 },
-    { field: "column10", headerName: "Column 10", flex: 1 },
-    { field: "column11", headerName: "Column 11", flex: 1 },
   ];
 
   return (
-    <Box m="20px">
-      <Header title="VEHICLE DETAIL"/>
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-          rows={mockDataContacts}
-          columns={columns}
-          components={{
-            Toolbar: GridToolbar,
-          }}
-        />
-      </Box>
-    </Box>
+    <div className="table-container">
+
+<div>
+      <h2 className="title">Vehicle Detail</h2>
+      <style>{`
+        .title {
+          font-size: 32px;
+          font-weight: bold;
+          text-align: center;
+        }
+      `}</style>
+    </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Colonne 1</th>
+            <th>Colonne 2</th>
+            <th>Colonne 3</th>
+            <th>Colonne 4</th>
+            <th>Colonne 5</th>
+            <th>Colonne 6</th>
+            <th>Colonne 7</th>
+            <th>Colonne 8</th>
+            <th>Colonne 9</th>
+            <th>Colonne 10</th>
+            <th>Colonne 11</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.id}>
+              <td>{row.id}</td>
+              <td>
+                <div className="column-content">{row.colonne1}</div>
+              </td>
+              <td>
+                <div className="column-content">{row.colonne2}</div>
+              </td>
+              <td>{row.colonne3}</td>
+              <td>{row.colonne4}</td>
+              <td>{row.colonne5}</td>
+              <td>{row.colonne6}</td>
+              <td>{row.colonne7}</td>
+              <td>{row.colonne8}</td>
+              <td>{row.colonne9}</td>
+              <td>{row.colonne10}</td>
+              <td>{row.colonne11}</td>
+     
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <style>{`
+        .table-container {
+          width: 100%;
+          overflow-x: auto;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          padding: 8px;
+          border: 1px solid #ccc;
+        }
+
+        thead {
+          background-color: #f2f2f2;
+        }
+
+        .column-content {
+          max-width: 160px;
+          word-wrap: break-word;
+        }
+      `}</style>
+    </div>
   );
 };
 
