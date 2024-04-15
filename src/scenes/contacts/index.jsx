@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography,Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Menu, MenuItem } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -11,8 +10,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from "@material-ui/core";
 import { Grid } from "@mui/material";
-import axios from 'axios';
-
+import axios from "axios";
+import { Api_client } from "../../data/Api";
 
 const Contacts = () => {
   const theme = useTheme();
@@ -20,7 +19,26 @@ const Contacts = () => {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  const [make, setMake] = useState();
+  const [model, setModel] = useState();
+  const [numeroChassi, setNumeroChassi] = useState();
+  const [typeCarburant, setTypeCarburant] = useState();
+  const [licensePlate, setLicensePlate] = useState();
+  const [isLoading, setIsLoading] = useState(false)
+  const [data, SetData] = useState([]);
   const navigate = useNavigate(); 
+
+  const fetchData = () => {
+    setIsLoading(true);
+    Api_client.get("vehicule/vehicule/").then((response) => {
+      setIsLoading(false);
+      SetData(response.data)
+    })
+  };
+
+  useEffect(() => {
+    fetchData()
+  }, []);
 
   const handleOpenDialog = () => {
     setOpen(true);
@@ -28,6 +46,7 @@ const Contacts = () => {
 
   const handleCloseDialog = () => {
     setOpen(false);
+    submitForm(formData);
   };
 
   const handleMenuClick = (event, id) => {
@@ -51,54 +70,49 @@ const Contacts = () => {
     handleMenuClose();
   };
 
-
   const submitForm = async (formData) => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/vehicule/vehicule/', formData);
-      console.log(response.data); 
+      Api_client.post("vehicule/vehicule/",
+        formData
+      );
     } catch (error) {
       console.error(error);
     }
   };
-  
-  const make = document.querySelector('input[name="make"]').value;
-  const model = document.querySelector('input[name="model"]').value;
-  const chassisNumber = document.querySelector('input[name="chassisNumber"]').value;
-  const fuelType = document.querySelector('input[name="fuelType"]').value;
-  const licensePlate = document.querySelector('input[name="licensePlate"]').value;
-  
+
   const formData = {
     make: make,
     model: model,
-    numero_chassi: chassisNumber,
-    type_carburant: fuelType,
+    numero_chassi: numeroChassi,
     license_plate: licensePlate,
+    type_carburant: typeCarburant,
   };
-  
-  submitForm(formData);
-
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "registrarId", headerName: "Vehicle ID" },
+   
     {
-      field: "name",
+      field: "make",
       headerName: "Make",
       flex: 1,
-      cellClassName: "name-column--cell",
     },
     {
-      field: "email",
+      field: "model",
       headerName: "Model",
       flex: 1,
     },
     {
-      field: "address",
+      field: "license_plate",
       headerName: "License Plate",
       flex: 1,
     },
     {
-      field: "phone",
+      field: "type_carburant",
+      headerName: "Fuel",
+      flex: 1,
+    },
+    {
+      field: "numero_chassi",
       headerName: "Car chassis Number",
       flex: 1,
       renderCell: (params) => (
@@ -179,7 +193,7 @@ const Contacts = () => {
 </Dialog>
 
         <DataGrid
-          rows={mockDataContacts}
+          rows={data}
           columns={columns}
           components={{
             Toolbar: GridToolbar,
@@ -200,32 +214,36 @@ const Contacts = () => {
         <Grid item xs={5}>
           <Box height="100%">
           <Typography variant="h6" style={{ marginBottom: "10px" }}>Make</Typography>
-            <input type="text" placeholder="Vehicle make" style={{ width: "90%", height: "40%" }} />
+            <input onChange={(e) => setMake(e.target.value)}
+            type="text" placeholder="Vehicle make" style={{ width: "90%", height: "40%" }} />
           
           </Box>
         </Grid>
         <Grid item xs={6}>
           <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px",  }}>Fuel</Typography>
+          <Typography variant="h6" style={{ marginBottom: "10px", marginLeft:"20px"}}>Fuel</Typography>
             <input type="text" placeholder="Fuel type" style={{ width: "90%", height: "40%",marginLeft:"20px" }} />
           </Box>
         </Grid>
         <Grid item xs={5}>
           <Box height="100%">
           <Typography variant="h6" style={{ marginBottom: "10px" }}>Model</Typography>
-            <input type="text" placeholder="Vehicle model" style={{ width: "100%", height: "40%" }} />
+            <input onChange={(e) => setModel(e.target.value)}
+            type="text" placeholder="Vehicle model" style={{ width: "100%", height: "40%" }} />
           </Box>
         </Grid>
         <Grid item xs={6}>
           <Box height="100%">
           <Typography variant="h6" style={{ marginBottom: "10px", marginLeft:"20px" }}>License plate</Typography>
-            <input type="text" placeholder="License plate" style={{ width: "90%", height: "40%",marginLeft:"20px" }} />
+            <input onChange={(e) => setLicensePlate(e.target.value)}
+            type="text" placeholder="License plate" style={{ width: "90%", height: "40%",marginLeft:"20px" }} />
           </Box>
         </Grid>
         <Grid item xs={11}>
           <Box height="100%">
           <Typography variant="h6" style={{ marginBottom: "10px" }}>Car chassis number</Typography>
-            <input type="text" placeholder="Car chassis number" style={{ width: "100%", height: "40%" }} />
+            <input onChange={(e) => setNumeroChassi(e.target.value)}
+            type="text" placeholder="Car chassis number" style={{ width: "100%", height: "40%" }} />
           </Box>
         </Grid>
       </Grid>

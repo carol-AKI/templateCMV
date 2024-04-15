@@ -5,19 +5,59 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-
+import React, { useEffect, useState } from "react";
+import { Api_client } from "../../data/Api";
 const Form = () => {
 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:600px)");
+  const [vehicle, setVehicle] = useState();
+  const [demandeur, setDemandeur] = useState();
+  const [conducteur, setConducteur] = useState();
+  const [kilometrage , setKilometrage] = useState();
+  const [destination , setDestination] = useState();
+  const [objet, setObjet] = useState();
+  const [heure_depart  , setHeureDepart] = useState();
+  const [heure_retour , setHeureRetour] = useState();
+  const [observation , setObservation] = useState();
+  const [isLoading, setIsLoading] = useState(false)
+  const [data, SetData] = useState([]);
 
-  const handleFormSubmit = (values) => {
-    console.log(values);
+  const [background, setBackground] = useState("#e8e8e8");  
+
+  useEffect(() => {
+    const mode = theme.palette.mode;
+    const newBackground = mode === "dark" ? "#333333" : "#e8e8e8";
+    setBackground(newBackground);
+  }, [theme.palette.mode]);
+
+  const submitForm = async (formData) => {
+    try {
+      Api_client.post("course/mouvement/",
+        formData
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const formData = {
+    vehicle: vehicle,
+    demandeur: demandeur,
+    conducteur: conducteur,
+    kilometrage: kilometrage,
+    destination : destination ,
+    objet: objet,
+    heure_depart: heure_depart,
+    heure_retour: heure_retour,
+    observation: observation,
   };
 
   return (
-    <Box m="20px">
+    <Box m="20px" sx={{ backgroundColor :  background,  
+      width: "100%", height: "80vh", 
+      marginTop: "90px", borderRadius: "10px",}}>
       <Header title="CREATE RUNNING" subtitle="Create a New Running" />
 
       <Formik
@@ -51,24 +91,18 @@ const Form = () => {
             name="Vehicle"
             error={!!touched.Vehicle && !!errors.Vehicle}
             helperText={touched.Vehicle && errors.Vehicle}
-            sx={{
-                gridColumn: "span 2",
-                marginTop: "20px",
-               "& .MuiInputLabel-root": {
-               color: `${colors.greenAccent[500]} !important`,
-    },
-  }}
+            sx={{ gridColumn: "span 2",  marginTop: "20px", marginLeft:"10px" }}
 />
               <TextField
                 fullWidth
                 type="text"
-                label="Objet"
+                label="Object"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                name="Objet"
+                name="Object"
                 error={!!touched.Objet && !!errors.Objet}
                 helperText={touched.Objet && errors.Objet}
-                sx={{ gridColumn: "span 2",  marginTop: "20px"  }}
+                sx={{ gridColumn: "span 2",  marginTop: "20px"}}
               />
               <TextField
                 fullWidth
@@ -79,7 +113,7 @@ const Form = () => {
                 name="Requester"
                 error={!!touched.Requester && !!errors.Requester}
                 helperText={touched.Requester && errors.Requester}
-                sx={{ gridColumn: "span 2",  marginTop: "30px"  }}
+                sx={{ gridColumn: "span 2",  marginTop: "30px",marginLeft:"10px"  }}
               />
               <TextField
                 fullWidth
@@ -102,15 +136,38 @@ const Form = () => {
                 name="Destination"
                 error={!!touched.Destination && !!errors.Destination}
                 helperText={touched.Destination && errors.Destination}
+                sx={{ gridColumn: "span 2",  marginTop: "30px",marginLeft:"10px" }}
+              />
+
+               <TextField
+                fullWidth
+                type="text"
+                label="Mileage"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                name="Mileage"
+                error={!!touched.Destination && !!errors.Destination}
+                helperText={touched.Destination && errors.Destination}
                 sx={{ gridColumn: "span 2",  marginTop: "30px" }}
               />
                <TextField
                 fullWidth
                 type="text"
-                label="Time taken"
+                label="Start time"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                name="TimeTaken"
+                name="Start time"
+                error={!!touched.TimeTaken && !!errors.TimeTaken}
+                helperText={touched.TimeTaken && errors.TimeTaken}
+                sx={{ gridColumn: "span 2",  marginTop: "30px",marginLeft:"10px" }}
+              />
+                 <TextField
+                fullWidth
+                type="text"
+                label="Arriving time"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                name="Arriving time"
                 error={!!touched.TimeTaken && !!errors.TimeTaken}
                 helperText={touched.TimeTaken && errors.TimeTaken}
                 sx={{ gridColumn: "span 2",  marginTop: "30px" }}
@@ -125,14 +182,14 @@ const Form = () => {
                 name="Observation"
                 error={!!touched.Observation && !!errors.Observation}
                 helperText={touched.Observation && errors.Observation}
-                sx={{ gridColumn: "span 4",  marginTop: "30px" }}
+                sx={{ gridColumn: "span 4",  marginTop: "30px",marginLeft:"10px" }}
               />
             </Box>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-      <Button type="submit" color="secondary" variant="contained" style={{ marginRight: '40px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '60px' }}>
+      <Button type="submit" color="secondary" variant="contained" style={{ marginRight: '80px' }}>
         Create
       </Button>
-      <Button type="submit" color="secondary" variant="contained">
+      <Button type="submit" color="secondary" variant="contained"style={{ marginRight: '40px' }}>
         Cancel
       </Button>
     </div>
