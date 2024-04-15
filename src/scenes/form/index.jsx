@@ -32,7 +32,7 @@ const Form = () => {
     setBackground(newBackground);
   }, [theme.palette.mode]);
 
-  const submitForm = async (formData) => {
+  const handleFormSubmit = async (formData) => {
     try {
       Api_client.post("course/mouvement/",
         formData
@@ -60,9 +60,9 @@ const Form = () => {
       marginTop: "90px", borderRadius: "10px",}}>
       <Header title="CREATE RUNNING" subtitle="Create a New Running" />
 
-      <Formik
+      <Form
         onSubmit={handleFormSubmit}
-        initialValues={initialValues}
+       
         validationSchema={checkoutSchema}
       >
         {({
@@ -195,7 +195,7 @@ const Form = () => {
     </div>
           </form>
         )}
-      </Formik>
+      </Form>
     </Box>
   );
 };
@@ -214,13 +214,5 @@ const checkoutSchema = yup.object().shape({
   address1: yup.string().required("required"),
   address2: yup.string().required("required"),
 });
-const initialValues = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  contact: "",
-  address1: "",
-  address2: "",
-};
 
 export default Form;
