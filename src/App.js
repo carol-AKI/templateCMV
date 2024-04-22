@@ -22,7 +22,6 @@ import Fuel from "./scenes/Fuel"
 import Insurance from "./scenes/insurance";
 import TechnicalControl from "./scenes/TechnicalControl";
 import Maintenance from "./scenes/Maintenance";
-import Operation from "./scenes/Operation";
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -54,7 +53,6 @@ function App() {
               <Route path="/Insurance" element={<Insurance/>} />
               <Route path="/Technical Control" element={<TechnicalControl/>} />
               <Route path="/Maintenance" element={<Maintenance/>} />
-              <Route path="/operation" element={<Operation/>} />
             </Routes>
           </main>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -7,38 +7,88 @@ import {
   DialogTitle,
   IconButton,
   Typography,
-  Grid
+  Grid,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import { Api_client } from "../../data/Api";
 
 
 const Personal = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const [open, setOpen] = useState(false);
+const theme = useTheme();
+const colors = tokens(theme.palette.mode);
+const [open, setOpen] = useState(false);
+const [nom, setNom] = useState();
+const [prenom, setPrenom] = useState();
+const [adresse, setAdresse] = useState();
+const [telephone, setTelephone] = useState();
+const [email, setEmail] = useState();
+const [intitule, setIntitule] = useState([]);
+const [isLoading, setIsLoading] = useState(false);
+const [data, setData] = useState([]);
 
-  const handleOpenDialog = () => {
-    setOpen(true);
-  };
 
-  const handleCloseDialog = () => {
-    setOpen(false);
-  };
+const fetchData = () => {
+  setIsLoading(true);
+  Api_client.get("parametrage/personnelle/").then((response) => {
+    setIsLoading(false);
+    setData(response.data)
+    setIntitule(response.data)
+  })
+};
+
+useEffect(() => {
+  fetchData();
+}, []);
+
+const handleOpenDialog = () => {
+  setOpen(true);
+};
+
+const handleCloseDialog = () => {
+  setOpen(false);
+  submitForm(formData);
+};
+
+const submitForm = async (formData) => {
+  try {
+    Api_client.post("parametrage/personnelle/",
+      formData
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const formData = {
+  nom: nom,
+  prenom: prenom,
+  adresse: adresse,
+  telephone: telephone,
+  email: email,
+  intitule: intitule,
+};
+
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "PersonalId", headerName: "Personal ID" },
     {
-      field: "name",
+      field: "nom",
       headerName: "Name",
       flex: 1,
-      cellClassName: "name-column--cell",
+    },
+    {
+      field: "prenom",
+      headerName: "Surname",
+      flex: 1,
     },
     {
       field: "email",
@@ -56,8 +106,8 @@ const Personal = () => {
       flex: 1,
     },
     {
-      field: "signature",
-      headerName: "Signature",
+      field: "intitule",
+      headerName: "intitule",
       flex: 1,
     },
   ];
@@ -113,7 +163,7 @@ const Personal = () => {
         }}
       >
         <DataGrid
-          rows={mockDataContacts}
+         rows={data}
           columns={columns}
           components={{ Toolbar: GridToolbar }}
         />
@@ -132,27 +182,53 @@ const Personal = () => {
         <Grid item xs={6}>
           <Box height="100%">
           <Typography variant="h6" style={{ marginBottom: "10px" }}>Name</Typography>
-            <input type="text" placeholder="Name" style={{ width: "90%", height: "40%" }} />
+            <input onChange={(e) => setNom(e.target.value)} 
+            type="text" placeholder="Name" style={{ width: "90%", height: "40%" }} />
           </Box>
         </Grid>
         <Grid item xs={6}>
           <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>e-mail</Typography>
-            <input type="text" placeholder="dogo@gmail.com" style={{ width: "100%", height: "40%" }} />
+          <Typography variant="h6" style={{ marginBottom: "10px" }}>Surname</Typography>
+            <input onChange={(e) => setPrenom(e.target.value)}
+            type="text" placeholder="surname" style={{ width: "100%", height: "40%" }} />
           </Box>
         </Grid>
         <Grid item xs={6}>
           <Box height="100%">
           <Typography variant="h6" style={{ marginBottom: "10px" }}>Phone number</Typography>
-            <input type="text" placeholder="your phone number" style={{ width: "90%", height: "40%" }} />
+            <input onChange={(e) => setTelephone(e.target.value)}
+            type="text" placeholder="your phone number" style={{ width: "90%", height: "40%" }} />
           </Box>
-        </Grid>
-        <Grid item xs={6}>
+          </Grid>
+          <Grid item xs={6}>
           <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>Signature</Typography>
-            <input type="text" placeholder="XXXXXXXXXXXX" style={{ width: "100%", height: "40%" }} />
+          <Typography variant="h6" style={{ marginBottom: "10px" }}>Adress</Typography>
+            <input onChange={(e) => setAdresse(e.target.value)}
+            type="text" placeholder="adress" style={{ width: "90%", height: "40%" }} />
+          </Box>
+          </Grid>
+          <Grid item xs={6}>
+          <Box height="100%">
+          <Typography variant="h6" style={{ marginBottom: "10px" }}>mail</Typography>
+            <input onChange={(e) => setEmail(e.target.value)}
+            type="text" placeholder="dogo@gmail.com" style={{ width: "90%", height: "40%" }} />
           </Box>
         </Grid>
+        <Grid item xs={6} style={{marginTop:"30px"}}>
+                <FormControl fullWidth color='secondary' size='small'>
+                  <InputLabel id='intitule'>Intitule</InputLabel>
+                  <Select
+                    label='Intitule'
+                    onChange={(e) => {
+                      setIntitule(e.target.value);
+                    }}>
+                    
+                      <MenuItem value="demandeur">demandeur</MenuItem>
+                      <MenuItem value="conducteur">conducteur</MenuItem>
+                  
+                  </Select>
+                </FormControl>
+              </Grid>
       </Grid>
       <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
         <IconButton onClick={handleCloseDialog}>
