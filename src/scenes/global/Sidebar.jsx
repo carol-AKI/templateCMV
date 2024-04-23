@@ -22,7 +22,7 @@ const Sidebar = () => {
   return (
 
     <ProSidebar style={{ backgroundColor: '#f2f2f2' , marginTop: '0px'}}>
-      <img src="/assets/logo2.jpeg" alt="Logo" style={{ height: '69px', width: 'auto' }} />
+      <img src="/assets/logo2.jpeg" alt="Logo" style={{ height: '100px', width: 'auto' }} />
       <Menu iconShape="square" active={selectedMenu}>
         <MenuItem
           icon={<HomeOutlinedIcon />}

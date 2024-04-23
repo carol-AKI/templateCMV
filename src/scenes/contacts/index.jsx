@@ -1,29 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { Typography,Box, Button, Dialog, DialogContent, DialogTitle, IconButton, Menu, MenuItem } from "@mui/material";
+import { Typography,Box, Button, Dialog, DialogContent, DialogTitle, Modal,IconButton, Grid, InputLabel, Menu, MenuItem, TextField } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
+import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 import { FormControl, FormGroup, FormControlLabel, Checkbox } from "@material-ui/core";
-import { Grid } from "@mui/material";
 import axios from "axios";
 import { Api_client } from "../../data/Api";
 
 const Contacts = () => {
+  const [openModal, setopenModal] = useState(false);
+  const [openModalu, setopenModalu] = useState(false);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  const [id, setId] = useState();
   const [make, setMake] = useState();
   const [model, setModel] = useState();
   const [numeroChassi, setNumeroChassi] = useState();
   const [typeCarburant, setTypeCarburant] = useState();
   const [licensePlate, setLicensePlate] = useState();
+  const [makeu, setMakeu] = useState();
+  const [modelu, setModelu] = useState();
+  const [numeroChassiu, setNumeroChassiu] = useState();
+  const [typeCarburantu, setTypeCarburantu] = useState();
+  const [licensePlateu, setLicensePlateu] = useState();
   const [isLoading, setIsLoading] = useState(false)
   const [data, SetData] = useState([]);
   const navigate = useNavigate(); 
@@ -48,6 +55,9 @@ const Contacts = () => {
     setOpen(false);
     submitForm(formData);
   };
+  const handleCloseu = () => {
+    setopenModalu(false);
+  };
 
   const handleMenuClick = (event, id) => {
     setAnchorEl(event.currentTarget);
@@ -64,11 +74,23 @@ const Contacts = () => {
       navigate(`/VehicleDetail/${selectedRowId}`);
     } else if (action === "Vehicle Status") {
       setStatusDialogOpen(true);
-    } else {
+    } else if (action === "Rename") { // Ouvrir le modal de mise à jour du véhicule en cliquant dessus
+     const vehicleData = data.find(vehicle => vehicle.id === selectedRowId);
+     // Pré-remplir le formulaire de mise à jour avec les données existantes du véhicule
+     setId(vehicleData.id);
+     setMakeu(vehicleData.make);
+     setModelu(vehicleData.model);
+     setNumeroChassiu(vehicleData.numero_chassi);
+     setTypeCarburantu(vehicleData.type_carburant);
+     setLicensePlateu(vehicleData.license_plate);
+     setopenModalu(true);
+   }else {
       console.log(`Clicked on ${action} for row with id: ${selectedRowId}`);
     }
     handleMenuClose();
   };
+
+
 
   const submitForm = async (formData) => {
     try {
@@ -78,6 +100,27 @@ const Contacts = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+     //updatevehicule
+  const updateVehicule = () => {
+    setIsLoading(true);
+    Api_client.put(`vehicule/vehicule/${id}`, {
+       make: makeu,
+       model: modelu,
+       numero_chassi: numeroChassiu,
+       license_plate: licensePlateu,
+       type_carburant: typeCarburantu,
+      
+    })
+      .then((response) => {
+        setIsLoading(false);
+        setopenModalu(false);
+        fetchData();
+        console.log(response.data);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+      });
   };
 
   const formData = {
@@ -252,7 +295,7 @@ const Contacts = () => {
           <CloseIcon />
         </IconButton>
         <IconButton onClick={handleCloseDialog}>
-          <CheckIcon />
+          <ArrowDownwardRoundedIcon />
         </IconButton>
       </Box>
     </form>
@@ -264,7 +307,98 @@ const Contacts = () => {
         <MenuItem onClick={() => handleActionClick("Rename")}>Rename</MenuItem>
         <MenuItem onClick={() => handleActionClick("Delete")}>Delete</MenuItem>
       </Menu>
-      
+           <Modal open={openModalu} onClose={handleCloseu}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 800,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+          }}>
+          <Typography variant='h3'>Etat Carburant</Typography>
+          <Box margin={2}>
+            <Grid container spacing={2} item xs={12} alignItems='center'>
+              <Grid item xs={6}>
+                <TextField
+                  label='make'
+                  value={makeu}
+                  onChange={(e) => {
+                    setMakeu(e.target.value);
+                  }}
+                  color='secondary'
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='model'
+                  value={modelu}
+                  onChange={(e) => {
+                    setModelu(e.target.value);
+                  }}
+                  color='secondary'
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='numeroChassi'
+                  value={numeroChassiu}
+                  onChange={(e) => {
+                    setNumeroChassiu(e.target.value);
+                  }}
+                  color='secondary'
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='typeCarburant'
+                  value={typeCarburantu}
+                  onChange={(e) => {
+                    setTypeCarburantu(e.target.value);
+                  }}
+                  color='secondary'
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='licenseplate'
+                  value={licensePlateu}
+                  onChange={(e) => {
+                    setLicensePlateu(e.target.value);
+                  }}
+                  color='secondary'
+                />
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Box
+            margin={2}
+            marginTop={5}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "end",
+            }}>
+            <Button
+              color='secondary'
+              variant='contained'
+              sx={{ marginRight: 3 }}
+              onClick={updateVehicule}>
+              {isLoading ? <Typography>wait....</Typography> : <ArrowDownwardRoundedIcon />}
+            </Button>
+            <Button
+              color='error'
+              variant='contained'
+              onClick={() => handleCloseu()}>
+              <CloseIcon />
+            </Button>
+          </Box>
+        </Box>
+      </Modal> 
     </Box>
   );
 };
