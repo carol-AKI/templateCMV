@@ -24,7 +24,7 @@ import { FormControl, FormGroup, FormControlLabel, Checkbox } from "@material-ui
 import { Grid } from "@mui/material";
 import { Api_client } from "../../data/Api";
 
-const Contacts = () => {
+const Vehicles = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -45,6 +45,8 @@ const Contacts = () => {
   const [licensePlateu, setLicensePlateu] = useState();
 
   const [isLoading, setIsLoading] = useState(false)
+  const [vehicule, setVehicule] = useState([])
+  const [id, setId] = useState()
   const [data, SetData] = useState([]);
   const navigate = useNavigate(); 
   
@@ -55,10 +57,17 @@ const Contacts = () => {
       SetData(response.data)
     })
   };
+  const fetchVehiculeInfo = (id) => {
+    setIsLoading(true);
+    Api_client.get(`vehicule/allinfo/${id}`)
+    .then((response) => {
+      setIsLoading(false);
+      setVehicule(response.data)
+    })
+  }
 
   useEffect(() => {
-    fetchData()
-    
+    fetchData() 
   }, []);
   
   const handleCloseDialog = () => {
@@ -79,16 +88,14 @@ const Contacts = () => {
     setSelectedRowId(null);
   };
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const handleActionClick = (action) => {
-    if (action === "View Details") {
-      navigate(`/VehicleDetail`);
-    } else if (action === "Vehicle Status") {
-      setStatusDialogOpen(true);
-    } else {
-      console.log(`Clicked on ${action} for row with id: ${selectedRowId}`);
-    }
-    handleMenuClose();
+ 
+const handleActionClick = () => {
+ 
+    navigate(`/VehicleDetail`, { state: selectedRowId });
+  
   };
+  
+
 
 
   const createVehicule= () => {
@@ -113,23 +120,6 @@ const Contacts = () => {
   };
 
 
-  const deleteVehicule= (id) => {
-    setIsLoading(true);
-    Api_client.delete(`vehicule/vehicule/${id}/`)
-      .then((response) => {
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {});
-  };
-
-
-  const handleCloseu = () => {
-    setopenModalu(false);
-  };
-
-  
-    
   const updateVehicule= () => {
     setIsLoading(true);
     Api_client.post("vehicule/vehicule/", {
@@ -149,7 +139,20 @@ const Contacts = () => {
        setIsLoading(false);
       });
   };
+  const deleteVehicule= (id) => {
+    setIsLoading(true);
+    Api_client.delete(`vehicule/vehicule/${id}/`)
+      .then((response) => {
+        fetchData();
+        console.log(response.data);
+      })
+      .catch((error) => {});
+  };
 
+
+  const handleCloseu = () => {
+    setopenModalu(false);
+  };
 
 
 
@@ -440,9 +443,11 @@ const Contacts = () => {
 
 
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => handleActionClick("View Details")}>View Details</MenuItem>
-        <MenuItem onClick={() => handleActionClick("Vehicle Status")}>Vehicle Status</MenuItem>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} onChange={(e)=> {handleActionClick (e)
+      console.log(e.target.value)
+      }}>
+        <MenuItem value= "ViewDetails" onClick={handleActionClick} >View Details</MenuItem>
+        <MenuItem onClick={() => ("Vehicle Status")}>Vehicle Status</MenuItem>
         <MenuItem onClick={() => updateVehicule("Rename")}>Rename</MenuItem>
         <MenuItem onClick={() => deleteVehicule(selectedRowId)}>Delete</MenuItem>
       </Menu>
@@ -451,7 +456,7 @@ const Contacts = () => {
   );
 };
 
-export default Contacts;
+export default Vehicles;
 
 
 

@@ -1,264 +1,98 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Modal,
-  Typography,
-  useTheme,
-  TextField,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-} from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-import { useState, useEffect } from "react";
-import SaveIcon from "@mui/icons-material/Save";
-import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
-import { MenuItem } from "react-pro-sidebar";
-import CheckIcon from "@mui/icons-material/Check";
+import { useLocation } from "react-router-dom";
 
 const Detail = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [openModal, setopenModal] = useState(false);
-  const [openModalu, setopenModalu] = useState(false);
-  const [isLoading, setisLoading] = useState(false);
-
-  const [panne, setPanne] = useState([]);
-  const [operation, setOperation] = useState([]);
-  const [main_oeuvre, setMainOeuvre] = useState();
-  const [piece_rechange, setPieceRechange] = useState();
-  const [cout_piece, setCoutPiece] = useState();
-  const [total, setTotal] = useState();
-  const [garage, setGarage] = useState();
+  const location = useLocation()
+  const id_vehicule = location.state
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState([]);
   const [vehicule, setVehicule] = useState([]);
 
-  const [id, setid] = useState();
+console.log(id_vehicule,"ffdjndcdcdcdcnj")
 
-  const [vehiculeu, setVehiculeu] = useState();
-  const [operationu, setOperationu] = useState();
-  const [main_oeuvreu, setMainOeuvreu] = useState();
-  const [cout_pieceu, setCoutPieceu] = useState();
-  const [panneu, setPanneu] = useState();
-  const [totalu, setTotalu] = useState();
-  const [piece_rechangeu, setPieceRechangeu] = useState();
-  const [garageu, setGarageu] = useState();
-  
-  const [data, setdata] = useState([]);
-
-  const fetchData = () => {
-    setisLoading(true);
-    Api_client.get("entretien/entretien/")
-      .then((response) => {
-        setisLoading(false);
-        setopenModal(false);
-        setdata(response.data);
-      })
-      .catch((error) => {
-        setisLoading(false);
-      });
-  };
-
+  // detail voiture
 
   
-  const fetchVehicule = () => {
-    setisLoading(true);
-    Api_client.get("entretien/entretien/").then((response) => {
-      setisLoading(false);
-      setVehicule(response.data);
-    });
-  };
-
-  
-  useEffect(() => {
-    fetchData();
-    fetchVehicule();
-  }, []);
-
-  const handleCloseDialog = () => {
-    setopenModal(false);
-  };
-
-  // CREATE
-
-  const createMaintenance= () => {
-    setisLoading(true);
-    Api_client.post("entretien/entretien/", {
-      vehicle: vehicule,
-      panne: panne,
-      operation: operation,
-      main_oeuvre: main_oeuvre,
-      piece_rechange: piece_rechange,
-      cout_piece: cout_piece,
-      total: total,
-    })
+  useEffect(()=>{
+    const fetchVehiculeInfo = () => {
+      setIsLoading(true);
+      Api_client.get(`vehicule/allinfo/${id_vehicule}`)
       .then((response) => {
-        setisLoading(false);
-        setopenModal(false);
-        fetchData();
-        console.log(response.data);
+        setIsLoading(false);
+        setVehicule(response.data)
       })
-      .catch((error) => {
-        setisLoading(false);
-      });
-  };
+    } 
+    fetchVehiculeInfo()
+  },[])
 
-  // UPDATE
+  const detailData = data.map((item) => ({
+    id: item.id,
+    Date: item.Date, 
+    assurance: item.assurance,
+    controleTechniques: item.controleTechniques,
+    mouvement: item.mouvement,
+    verification: item.verification,
+    entretien: item.entretien,
+  }));
 
-  const updateMaintenance= () => {
-    setisLoading(true);
-    Api_client.put(`entretien/entretien/${id}`, {
-      vehicle: vehiculeu,
-      panne: panneu,
-      operation: operationu,
-      main_oeuvre: main_oeuvreu,
-      piece_rechange: piece_rechangeu,
-      cout_piece: cout_pieceu,
-      total: totalu,
-    })
-      .then((response) => {
-        setisLoading(false);
-        setopenModalu(false);
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {
-        setisLoading(false);
-      });
-  };
-
-  // DELETE
-
-  const deleteMaintenance= (id) => {
-    setisLoading(true);
-    Api_client.delete(`entretien/entretien/${id}`)
-      .then((response) => {
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const handleClose = () => {
-    setopenModal(false);
-  };
-  const handleCloseu = () => {
-    setopenModalu(false);
-  };
   const columns = [
-    { field: "id", headerName: "ID" },
-
+    { field: "Date", headerName: "Date" },
     {
-      field: "vehicle",
-      headerName: "vehicle",
+      field: "assurrance",
+      headerName: "Assurance",
       flex: 1,
-      cellClassName: "Vehicle-column--cell",
-    },
-  
-    {
-      field: "panne",
-      headerName: "panne",
-      flex: 1,
-      cellClassName: "panne-column--cell",
+      cellClassName: "assurrance-column--cell",
     },
     {
-      field: "operation",
-      headerName: "operation",
+      field: "controleTechniques",
+      headerName: "Contrôle Technique",
       flex: 1,
-      cellClassName: "operation-column--cell",
+      cellClassName: "controleTechniques-column--cell",
     },
     {
-      field: "main_oeuvre",
-      headerName: "main_oeuvre",
+      field: "mouvement",
+      headerName: "Mouvement",
       flex: 1,
-      cellClassName: "main_oeuvre-column--cell",
+      cellClassName: "mouvement-column--cell",
     },
     {
-      field: "piece_rechange",
-      headerName: "piece_rechange",
+      field: "verification",
+      headerName: "Vérification",
       flex: 1,
-      cellClassName: "piece_rechange-column--cell",
+      cellClassName: "verification-column--cell",
     },
     {
-      field: "cout_piece",
-      headerName: "cout_piece",
+      field: "entretien",
+      headerName: "Entretien",
       flex: 1,
-      cellClassName: "cout_piece-column--cell",
-    },
-    {
-      field: "total",
-      headerName: "total",
-      flex: 1,
-      cellClassName: "total-column--cell",
-    },
-
-    {
-      field: "actions",
-      headerName: "Actions",
-      // width: "50%",
-      align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              setopenModalu(true);
-              setid(params.row.id);
-              setVehiculeu(params.row.vehicle);
-              setOperationu(params.row.operation);
-              setPanneu(params.row.panne);
-              setMainOeuvreu(params.row.main_oeuvre);
-              setPieceRechangeu(params.row.piece_rechange);
-              setCoutPieceu(params.row.cout_piece);
-              setGarageu(params.row.garage);
-              setTotalu(params.row.total);
-             
-            }}>
-            <EditIcon />
-          </IconButton>
-
-          <IconButton
-            onClick={() => {
-              deleteMaintenance(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
+      cellClassName: "entretien-column--cell",
     },
   ];
 
   return (
-    <Box m='20px'>
+    <Box m="20px">
       <Box
         sx={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
-          
           padding: 2,
           alignItems: "center",
           borderRadius: 5,
-        }}>
-        <Header title='' subtitle='' />
-        <Button
-         type="submit"
-         color="secondary"
-         variant="contained"
-         style={{ marginRight: "10px", marginBottom: "-30px" }}
-
-          onClick={() => setopenModal(true)}>
-          Ajouter
-        </Button>
+        }}
+      >
+        <Header title="" subtitle="" />
       </Box>
       <Box
-        m='40px 0 0 0'
-        height='75vh'
+        m="40px 0 0 0"
+        height="75vh"
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
@@ -283,170 +117,10 @@ const Detail = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
-        }}>
-        <DataGrid  rows={data} columns={columns} />
+        }}
+      >
+        <DataGrid rows={detailData} columns={columns} />
       </Box>
-
-      <Modal open={openModal} onClose={handleClose}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 800,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}>
-         
-          <Box margin={2}>
-            <Grid container spacing={2} item xs={12} alignItems='center'>
-            <Grid item xs={6}>
-                <FormControl fullWidth color='secondary' size='small'>
-                  <InputLabel id='vehicle'>Vehicle</InputLabel>
-                  <Select
-                    label='Vehicle'
-                    value={vehicule}
-                    onChange={(e) => {
-                      setVehicule(e.target.value);
-                    }}>
-                    {vehicule.map((item) => (
-                      <MenuItem key={item.make} value={item.make}>{item.make}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <TextField
-                  label='panne'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setPanne(e.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='operation'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setOperation(e.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='main_oeuvre'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setMainOeuvre(e.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='piece_rechange'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setPieceRechange(e.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='cout_piece'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setCoutPiece(e.target.value);
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={6}>
-                <TextField
-                  label='garage'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setGarage(e.target.value);
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={6}>
-                <TextField
-                  label='total'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setTotal(e.target.value);
-                  }}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-
-          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createMaintenance}>
-          <CheckIcon />
-        </IconButton>
-
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
-        </Box>
-      </Modal>
-      <Modal open={openModalu} onClose={handleCloseu}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 800,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}>
-          <Typography variant='h3'>Entretien</Typography>
-          <Box margin={2}>
-            <Grid container spacing={2} item xs={12} alignItems='center'>
-
-            <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
-                  <InputLabel id='vehicle'>Vehicle</InputLabel>
-                  <Select
-                    label='Vehicle'
-                    onChange={(e) => {
-                      setVehicule(e.target.value);
-                    }}>
-                    {vehicule.map((item) => (
-                      <MenuItem value={item.license_plate}>{item.license_plate}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-          
-            </Grid>
-          </Box>
-        </Box>
-      </Modal>
     </Box>
   );
 };

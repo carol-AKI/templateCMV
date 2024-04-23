@@ -47,7 +47,6 @@ const Form = () => {
   const [id, setid] = useState();
 
   const [vehiculeu, setVehiculeu] = useState();
-  const [selectVehiculeu, setselectVehiculeu] = useState();
   const [conducteuru, setConducteuru] = useState();
   const [demandeuru, setDemandeuru] = useState();
   const [km_departu, setKmDepartu] = useState();
@@ -79,13 +78,16 @@ const mouvementData = data.map(item =>
 ({
   id:item.id,
   vehicle:item.vehicule_info.vehicule,
+  vehicule_id: item.vehicle,
   objet:item.objet,
   heure_depart:item.heure_depart,
   heure_retour:item.heure_retour,
   observation:item.observation,
   kilometrage:item.kilometrage,
   demandeur:item.demandeur_info.demandeur,
+  demandeur_id: item.demandeur,
   conducteur:item.conducteur_info.conducteur,
+  conducteur_id: item.conducteur,
   destination:item.destination,
 
 } ) 
@@ -150,7 +152,7 @@ const mouvementData = data.map(item =>
   const updateCourse= () => {
     setisLoading(true);
     Api_client.put(`course/mouvement/${id}`, {
-      vehicule: selectVehiculeu,
+      vehicle: vehiculeu,
       demandeur: demandeuru,
       conducteur: conducteuru,
       objet: objetu,
@@ -253,9 +255,9 @@ const mouvementData = data.map(item =>
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicle);
-              setDemandeuru(params.row.demandeur);
-              setConducteuru(params.row.conducteur);
+              setVehiculeu(params.row.vehicule_id);
+              setDemandeuru(params.row.demandeur_id);
+              setConducteuru(params.row.conducteur_id);
               setDestinationu(params.row.destination);
               setObjetu(params.row.objet);
               setHeureDepartu(params.row.heure_depart);
@@ -374,7 +376,7 @@ const mouvementData = data.map(item =>
                       setSelectDemandeur(e.target.value);
                     }}>
                     {personnelle.map((item) => (
-                    <MenuItem value={item.id}>{item.prenom}</MenuItem>
+                    <MenuItem key={item.id} value={item.id}>{item.prenom}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -390,7 +392,7 @@ const mouvementData = data.map(item =>
                       setSelectConducteur(e.target.value);
                     }}>
                     {personnelle.map((item) => (
-                      <MenuItem value={item.id}>{item.nom}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.nom}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -526,9 +528,9 @@ setHeureRetour(e.target.value);
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
-                    value={selectVehiculeu}
+                    value={vehiculeu}
                     onChange={(e) => {
-                      setselectVehiculeu(e.target.value);
+                      setVehiculeu(e.target.value);
                     }}>
                     {vehicule.map((item) => (
                       <MenuItem key={item.id} value={item.id}>{item.license_plate}</MenuItem>
@@ -541,12 +543,12 @@ setHeureRetour(e.target.value);
                   <InputLabel id='demandeur'>Demandeur</InputLabel>
                   <Select
                     label='Demandeur'
-                    value={SelectDemandeur}
+                    value={demandeuru}
                     onChange={(e) => {
-                      setSelectDemandeur(e.target.value);
+                      setDemandeuru(e.target.value);
                     }}>
                     {personnelle.map((item) => (
-                      <MenuItem value={item.nom}>{item.prenom}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.prenom}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -557,12 +559,12 @@ setHeureRetour(e.target.value);
                   <InputLabel id='conducteur'>Conducteur</InputLabel>
                   <Select
                     label='Conducteur'
-                    value={SelectConducteur}
+                    value={conducteuru}
                     onChange={(e) => {
-                      setSelectConducteur(e.target.value);
+                      setConducteuru(e.target.value);
                     }}>
                     {personnelle.map((item) => (
-                      <MenuItem value={item.nom}>{item.prenom}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.prenom}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

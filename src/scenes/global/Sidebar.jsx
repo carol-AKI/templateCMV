@@ -36,7 +36,7 @@ const Sidebar = () => {
   active={selectedMenu === 'Vehicle'}
   onClick={() => {
     handleMenuClick('Vehicle');
-    navigate('/contacts');
+    navigate('/vehicles');
   }}>Vehicle</MenuItem>
 
         <SubMenu
