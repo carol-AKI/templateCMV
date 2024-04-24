@@ -28,6 +28,7 @@ const Carburant = () => {
   const [openModal, setopenModal] = useState(false);
   const [openModalu, setopenModalu] = useState(false);
   const [isLoading, setisLoading] = useState(false);
+
   const [id, setid] = useState();
   const [vehicle, setVehicle] = useState([]);
   const [selectVehicle, setSelectVehicle] = useState("");
@@ -166,12 +167,15 @@ const Carburant = () => {
       field: "litre",
       headerName: "litre",
       flex: 1,
-      cellClassName: "name-column--cell",
+      cellClassName: "Vehicle-column--cell",
     },
+  
+    
     {
       field: "prix_unitaire",
       headerName: "prix_unitaire",
       flex: 1,
+
       cellClassName: "name-column--cell",
     },
     {
@@ -226,11 +230,13 @@ const Carburant = () => {
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
+
           backgroundColor: colors.blueAccent[700],
           padding: 2,
           alignItems: "center",
           borderRadius: 5,
         }}>
+
         <Header title='info sur la consommation carburant' subtitle='liste des enregistrements' />
         <Button
           color='secondary'
@@ -311,6 +317,7 @@ const Carburant = () => {
                   </Select>
                 </FormControl>
               </Grid>
+
   
               <Grid item xs={6}>
                 <TextField
@@ -382,6 +389,7 @@ const Carburant = () => {
               <CloseIcon />
             </Button>
           </Box>
+
         </Box>
       </Modal>
       <Modal open={openModalu} onClose={handleCloseu}>
@@ -396,6 +404,7 @@ const Carburant = () => {
             boxShadow: 24,
             p: 4,
           }}>
+
           <Typography variant='h3'>Etat Carburant</Typography>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
@@ -423,12 +432,14 @@ const Carburant = () => {
                   value={litreu}
                   onChange={(e) => {
                     setLitreu(e.target.value);
+
                   }}
                   color='secondary'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
+
                   label='prix_unitaire'
                   value={prix_unitaireu}
                   onChange={(e) => {
@@ -437,6 +448,7 @@ const Carburant = () => {
                   color='secondary'
                 />
               </Grid>
+
               <Grid item xs={6}>
                 <TextField
                   label='cout'
@@ -447,9 +459,11 @@ const Carburant = () => {
                   color='secondary'
                 />
               </Grid>
+
               <Grid item xs={6}>
                 <TextField
                   label='station'
+
                   value={stationu}
                   onChange={(e) => {
                     setStationu(e.target.value);
@@ -457,6 +471,8 @@ const Carburant = () => {
                   color='secondary'
                 />
               </Grid>
+
+
             </Grid>
           </Box>
 
@@ -468,6 +484,7 @@ const Carburant = () => {
               alignItems: "center",
               justifyContent: "end",
             }}>
+
             <Button
               color='secondary'
               variant='contained'
@@ -481,6 +498,7 @@ const Carburant = () => {
               onClick={() => handleCloseu()}>
               <CloseIcon />
             </Button>
+
           </Box>
         </Box>
       </Modal>

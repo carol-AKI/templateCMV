@@ -36,7 +36,7 @@ const Sidebar = () => {
   active={selectedMenu === 'Vehicle'}
   onClick={() => {
     handleMenuClick('Vehicle');
-    navigate('/contacts');
+    navigate('/vehicles');
   }}>Vehicle</MenuItem>
 
         <SubMenu
@@ -73,21 +73,13 @@ const Sidebar = () => {
             <Link to="/Technical Control"/>
           </MenuItem>
         </SubMenu>
-        <SubMenu
-          title="Maintenance"
-          icon={<BuildOutlinedIcon />}
-          active={selectedMenu === 'Maintenance'}
-          onClick={() => handleMenuClick('Maintenance')}
-        >
-          <MenuItem>
-            Maintenance
-            <Link to="/Maintenance" />
-          </MenuItem>
-          <MenuItem>
-            Operation
-            <Link to="/operation" />
-          </MenuItem>
-        </SubMenu>
+ <MenuItem 
+  icon={<BuildOutlinedIcon />}
+  active={selectedMenu === 'Maintenance'}
+  onClick={() => {
+    handleMenuClick('Maintenance');
+    navigate('/Maintenance');
+  }}>Maintenance</MenuItem>
         <SubMenu
           title="Setting"
           icon={<SettingsOutlinedIcon />}

@@ -1,101 +1,128 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
+import { Box, useTheme } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import { tokens } from "../../theme";
+import Header from "../../components/Header";
+import { Api_client } from "../../data/Api";
+import { useLocation } from "react-router-dom";
 
-const VehicleDetail = () => {
-  const rows = [
-    { id: 1, colonne1: '',
-     colonne2: '',colonne3: '',
-     colonne4: '',colonne5: '',
-     colonne6: '',colonne7: '',
-     colonne8: '',colonne9: '',
-     colonne10: '',colonne11: ' ',
-  }
+const Detail = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const location = useLocation()
+  const id_vehicule = location.state
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [vehicule, setVehicule] = useState([]);
 
+console.log(id_vehicule,"ffdjndcdcdcdcnj")
+
+  // detail voiture
+
+  
+  useEffect(()=>{
+    const fetchVehiculeInfo = () => {
+      setIsLoading(true);
+      Api_client.get(`vehicule/allinfo/${id_vehicule}`)
+      .then((response) => {
+        setIsLoading(false);
+        setVehicule(response.data)
+      })
+    } 
+    fetchVehiculeInfo()
+  },[])
+
+  const detailData = data.map((item) => ({
+    id: item.id,
+    Date: item.Date, 
+    assurance: item.assurance,
+    controleTechniques: item.controleTechniques,
+    mouvement: item.mouvement,
+    verification: item.verification,
+    entretien: item.entretien,
+  }));
+
+  const columns = [
+    { field: "Date", headerName: "Date" },
+    {
+      field: "assurrance",
+      headerName: "Assurance",
+      flex: 1,
+      cellClassName: "assurrance-column--cell",
+    },
+    {
+      field: "controleTechniques",
+      headerName: "Contrôle Technique",
+      flex: 1,
+      cellClassName: "controleTechniques-column--cell",
+    },
+    {
+      field: "mouvement",
+      headerName: "Mouvement",
+      flex: 1,
+      cellClassName: "mouvement-column--cell",
+    },
+    {
+      field: "verification",
+      headerName: "Vérification",
+      flex: 1,
+      cellClassName: "verification-column--cell",
+    },
+    {
+      field: "entretien",
+      headerName: "Entretien",
+      flex: 1,
+      cellClassName: "entretien-column--cell",
+    },
   ];
 
   return (
-    <div className="table-container">
-
-<div>
-      <h2 className="title">Vehicle Detail</h2>
-      <style>{`
-        .title {
-          font-size: 32px;
-          font-weight: bold;
-          text-align: center;
-        }
-      `}</style>
-    </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Colonne 1</th>
-            <th>Colonne 2</th>
-            <th>Colonne 3</th>
-            <th>Colonne 4</th>
-            <th>Colonne 5</th>
-            <th>Colonne 6</th>
-            <th>Colonne 7</th>
-            <th>Colonne 8</th>
-            <th>Colonne 9</th>
-            <th>Colonne 10</th>
-            <th>Colonne 11</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              <td>{row.id}</td>
-              <td>
-                <div className="column-content">{row.colonne1}</div>
-              </td>
-              <td>
-                <div className="column-content">{row.colonne2}</div>
-              </td>
-              <td>{row.colonne3}</td>
-              <td>{row.colonne4}</td>
-              <td>{row.colonne5}</td>
-              <td>{row.colonne6}</td>
-              <td>{row.colonne7}</td>
-              <td>{row.colonne8}</td>
-              <td>{row.colonne9}</td>
-              <td>{row.colonne10}</td>
-              <td>{row.colonne11}</td>
-     
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <style>{`
-        .table-container {
-          width: 100%;
-          overflow-x: auto;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        th,
-        td {
-          padding: 8px;
-          border: 1px solid #ccc;
-        }
-
-        thead {
-          background-color: #f2f2f2;
-        }
-
-        .column-content {
-          max-width: 160px;
-          word-wrap: break-word;
-        }
-      `}</style>
-    </div>
+    <Box m="20px">
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          padding: 2,
+          alignItems: "center",
+          borderRadius: 5,
+        }}
+      >
+        <Header title="" subtitle="" />
+      </Box>
+      <Box
+        m="40px 0 0 0"
+        height="75vh"
+        sx={{
+          "& .MuiDataGrid-root": {
+            border: "none",
+          },
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+          },
+          "& .name-column--cell": {
+            color: colors.greenAccent[300],
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: colors.blueAccent[700],
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: colors.blueAccent[700],
+          },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
+        }}
+      >
+        <DataGrid rows={detailData} columns={columns} />
+      </Box>
+    </Box>
   );
 };
 
-export default VehicleDetail;
+export default Detail;
