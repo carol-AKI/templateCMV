@@ -13,9 +13,7 @@ const Detail = () => {
   const id_vehicule = location.state
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [vehicule, setVehicule] = useState([]);
-
-console.log(id_vehicule,"ffdjndcdcdcdcnj")
+ 
 
   // detail voiture
 
@@ -26,24 +24,27 @@ console.log(id_vehicule,"ffdjndcdcdcdcnj")
       Api_client.get(`vehicule/allinfo/${id_vehicule}`)
       .then((response) => {
         setIsLoading(false);
-        setVehicule(response.data)
+        setData([response.data])
+        console.log([response.data])
       })
     } 
     fetchVehiculeInfo()
-  },[])
+  },[id_vehicule])
 
   const detailData = data.map((item) => ({
-    id: item.id,
-    Date: item.Date, 
-    assurance: item.assurance,
-    controleTechniques: item.controleTechniques,
-    mouvement: item.mouvement,
-    verification: item.verification,
-    entretien: item.entretien,
+    id: id_vehicule,
+    assurrance: item.assurrance.valid,
+    controleTechniques: item.controleTechniques.valid,
+    mouvement: item.mouvement.destination,
+    verification:`${item.verification.lubrifiant}, 
+               eau:  ${item.verification.eau}, ${item.verification.frein}`,
+    entretien: item.entretien.operation,
   }));
 
+  console.log(detailData,'detailData')
+
   const columns = [
-    { field: "Date", headerName: "Date" },
+    { field: "date", headerName: "Date" },
     {
       field: "assurrance",
       headerName: "Assurance",
