@@ -27,8 +27,8 @@ import { Api_client } from "../../data/Api";
 const Vehicles = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [openModal, setopenModal] = useState(false);
-  const [openModalu, setopenModalu] = useState(false);
+  const [openModal, setopenModal] = useState(true);
+  const [openModalu, setopenModalu] = useState();
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRowId, setSelectedRowId] = useState(null);
@@ -122,7 +122,7 @@ const handleActionClick = () => {
 
   const updateVehicule= () => {
     setIsLoading(true);
-    Api_client.post("vehicule/vehicule/", {
+    Api_client.put(`vehicule/vehicule/${id}/`, {
     make: makeu,
     model: modelu,
     numero_chassi: numeroChassiu,
@@ -139,6 +139,7 @@ const handleActionClick = () => {
        setIsLoading(false);
       });
   };
+
   const deleteVehicule= (id) => {
     setIsLoading(true);
     Api_client.delete(`vehicule/vehicule/${id}/`)
