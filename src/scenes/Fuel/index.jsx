@@ -9,6 +9,7 @@ import {
   IconButton,
   FormControl,
   InputLabel,
+  MenuItem,
   Select,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -20,7 +21,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
-import { MenuItem } from "react-pro-sidebar";
 import CheckIcon from "@mui/icons-material/Check";
 
 const Carburant = () => {
@@ -30,27 +30,24 @@ const Carburant = () => {
   const [openModalu, setopenModalu] = useState(false);
   const [isLoading, setisLoading] = useState(false);
 
-  const [quantite, setQuantite] = useState([]);
+  const [litre, setLitre] = useState([]);
   const [station, setStation] = useState([]);
-  const [prix_unitaire, setPrixUnitaire] = useState();
-  const [prix_total, setPrixTotal] = useState();
-  const [vehicule, setVehicule] = useState([]);
-  const [SelectVehicule, SetSelectVehicule] = useState([]);
+  const [cout, setCout] = useState();
+  const [vehicule, setVehicule] = useState([]); 
+  const [selectedVehicule, setSelectedVehicule] = useState(''); 
 
   const [id, setid] = useState();
 
   const [vehiculeu, setVehiculeu] = useState();
-  const [quantiteu, setQuantiteu] = useState();
+  const [litreu, setLitreu] = useState();
   const [stationu, setStationu] = useState();
-  const [prix_unitaireu, setPrixUnitaireu] = useState();
-  const [prix_totalu, setPrixTotalu] = useState();
-
+  const [coutu, setCoutu] = useState();
   
   const [data, setdata] = useState([]);
 
   const fetchData = () => {
     setisLoading(true);
-    Api_client.get("carburant/carburant/")
+    Api_client.get("course/carburant/")
       .then((response) => {
         setisLoading(false);
         setopenModal(false);
@@ -63,7 +60,7 @@ const Carburant = () => {
 
   const fetchVehicule = () => {
     setisLoading(true);
-    Api_client.get("carburant/carburant/").then((response) => {
+    Api_client.get("vehicule/vehicule/").then((response) => {
       setisLoading(false);
       setVehicule(response.data);
     });
@@ -81,15 +78,22 @@ const Carburant = () => {
     setopenModal(false);
   };
 
+  const carburantData = data.map((item) =>({
+      id: item.id,
+      vehicle: item.vehicule_info.vehicule,
+      litre: item.litre,
+      cout: item.cout,
+      station: item.station,
+  }));
+console.log(vehicule)
   // CREATE
 
   const createCarburant= () => {
     setisLoading(true);
-    Api_client.post("carburant/carburant/", {
-      vehicle: vehicule,
-      quantite: quantite,
-      prix_unitaire: prix_unitaire,
-      prix_total: prix_total,
+    Api_client.post("course/carburant/", {
+      vehicle: selectedVehicule,
+      litre: litre,
+      cout: cout,
       station: station,
     })
       .then((response) => {
@@ -107,11 +111,10 @@ const Carburant = () => {
 
   const updateCarburant= () => {
     setisLoading(true);
-    Api_client.put(`carburant/carburant/${id}`, {
+    Api_client.put(`course/carburant/${id}`, {
       vehicle: vehiculeu,
-      quantite: quantiteu,
-      prix_unitaire: prix_unitaireu,
-      prix_total: prix_totalu,
+      litre: litreu,
+      cout: coutu,
       station: stationu,
     })
       .then((response) => {
@@ -129,7 +132,7 @@ const Carburant = () => {
 
   const deleteCarburant= (id) => {
     setisLoading(true);
-    Api_client.delete(`carburant/carburant/${id}`)
+    Api_client.delete(`course/carburant/${id}`)
       .then((response) => {
         fetchData();
         console.log(response.data);
@@ -154,22 +157,17 @@ const Carburant = () => {
     },
   
     {
-      field: "quantite",
-      headerName: "quantite",
+      field: "litre",
+      headerName: "litre",
       flex: 1,
-      cellClassName: "quantite-column--cell",
+      cellClassName: "litre-column--cell",
     },
+   
     {
-      field: "prix_unitaire",
-      headerName: "prix_unitaire",
+      field: "cout",
+      headerName: "cout",
       flex: 1,
-      cellClassName: "prix_unitaire-column--cell",
-    },
-    {
-      field: "prix_total",
-      headerName: "prix_total",
-      flex: 1,
-      cellClassName: "prix_total-column--cell",
+      cellClassName: "cout-column--cell",
     },
     {
       field: "station",
@@ -189,10 +187,10 @@ const Carburant = () => {
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicle);
-              setQuantiteu(params.row.quantite);
-              setPrixUnitaireu(params.row.prix_unitaire);
-              setPrixTotalu(params.row.prix);
+              setVehiculeu(params.row.vehicule_info.vehicule);
+              setCoutu(params.row.cout);
+              setLitreu(params.row.litre);
+
               setStationu(params.row.station);
              
             }}>
@@ -261,7 +259,7 @@ const Carburant = () => {
             color: `${colors.greenAccent[200]} !important`,
           },
         }}>
-        <DataGrid  rows={data} columns={columns} />
+        <DataGrid  rows={carburantData} columns={columns} />
       </Box>
 
       <Modal open={openModal} onClose={handleClose}>
@@ -279,22 +277,24 @@ const Carburant = () => {
          
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
-            <Grid item xs={6}>
-                <FormControl fullWidth color='secondary' size='small'>
-                  <InputLabel id='vehicle'>Vehicle</InputLabel>
-                  <Select
-                    label='Vehicle'
-                    value={vehicule}
-                    onChange={(e) => {
-                      setVehicule(e.target.value);
-                    }}>
-                    {vehicule.map((item) => (
-                      <MenuItem key={item.make} value={item.make}>{item.make}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
 
+            <Grid item xs={6}>
+      <FormControl fullWidth color='secondary' size='small'>
+        <InputLabel id='vehicle'>Vehicule</InputLabel>
+        <Select
+          label='Vehicle'
+          value={selectedVehicule}
+          onChange={(e) => setSelectedVehicule(e.target.value)}
+          
+        >
+          {vehicule.map((item) => (
+            <MenuItem key={item.id} value={item.id}>
+              {item.make}/{item.license_plate}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='station'
@@ -309,34 +309,23 @@ const Carburant = () => {
 
               <Grid item xs={6}>
                 <TextField
-                  label='quantite'
+                  label='litre'
                   fullWidth
                   color='secondary'
                   size='small'
                   onChange={(e) => {
-                    setQuantite(e.target.value);
+                    setLitre(e.target.value);
                   }}
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label='prix_unitaire'
+                  label='cout'
                   fullWidth
                   color='secondary'
                   size='small'
                   onChange={(e) => {
-                    setPrixUnitaire(e.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label='prix_total'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setPrixTotal(e.target.value);
+                    setCout(e.target.value);
                   }}
                 />
               </Grid>
@@ -376,9 +365,9 @@ const Carburant = () => {
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
-                    value={SelectVehicule}
+                    value={selectedVehicule}
                     onChange={(e) => {
-                      SetSelectVehicule(e.target.value);
+                      setSelectedVehicule(e.target.value);
                     }}>
                     {vehicule.map((item) => (
                       <MenuItem key={item.id} value={item.id}>{item.id}</MenuItem>
@@ -388,36 +377,24 @@ const Carburant = () => {
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label='quantite'
-                  value={quantiteu}
+                  label='litre'
+                  value={litreu}
                   onChange={(e) => {
-                    setQuantiteu(e.target.value);
+                    setLitreu(e.target.value);
                   }}
                   color='secondary'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label='Prix_unitaire'
-                  value={prix_unitaireu}
+                  label='cout'
+                  value={coutu}
                   onChange={(e) => {
-                    setPrixUnitaireu(e.target.value);
+                    setCoutu(e.target.value);
                   }}
                   color='secondary'
                 />
               </Grid>
-
-              <Grid item xs={6}>
-                <TextField
-                  label='Prix_total'
-                  value={prix_totalu}
-                  onChange={(e) => {
-                    setPrixTotalu(e.target.value);
-                  }}
-                  color='secondary'
-                />
-              </Grid>
-
               <Grid item xs={6}>
                 <TextField
                   label='Station'

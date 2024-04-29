@@ -10,42 +10,39 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useState, useEffect } from "react";
-import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
-import { MenuItem } from "react-pro-sidebar";
 import CheckIcon from "@mui/icons-material/Check";
 
-const Assurance = () => {
+const ControleTechnique = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
   const [openModalu, setopenModalu] = useState(false);
   const [isLoading, setisLoading] = useState(false);
 
-  const [refference, setRefference] = useState([]);
-  const [description, setDescription] = useState([]);
+  const [reference, setReference] = useState([]);
+  const [expired_at, setExpiredAt] =useState ([]);
   const [cout, setCout] = useState();
   const [vehicule, setVehicule] = useState([]);
   const [SelectVehicule, setSelectVehicule] = useState("");
 
   const [id, setid] = useState();
-
+  
   const [vehiculeu, setVehiculeu] = useState();
   const [coutu, setCoutu] = useState();
-  const [descriptionu, setDescriptionu] = useState();
-  const [refferenceu, setRefferenceu] = useState();
-  const [SelectVehiculeu, setSelectVehiculeu] = useState("");
-
-  
+  const [referenceu, setReferenceu] = useState();
+  const [expired_atu, setExpiredAtu] =useState ([]);
   const [data, setdata] = useState([]);
+  
 
   const fetchData = () => {
     setisLoading(true);
@@ -54,27 +51,39 @@ const Assurance = () => {
         setisLoading(false);
         setopenModal(false);
         setdata(response.data);
+        console.log(data)
       })
       .catch((error) => {
         setisLoading(false);
       });
   };
 
-
-  
   const fetchVehicule = () => {
     setisLoading(true);
-    Api_client.get("controle/assurances/").then((response) => {
+    Api_client.get("vehicule/vehicule/").then((response) => {
       setisLoading(false);
       setVehicule(response.data);
     });
   };
 
-  
+  const controleData = data.map(item =>
+
+    ({
+      id:item.id,
+      vehicle:item.vehicule_info.vehicule,
+      vehicle_id: item.vehicle,
+      expired_at: item.expired_at,
+      reference: item.reference,
+      cost: item.cost,
+    
+    } ) 
+    
+    );
+
   useEffect(() => {
     fetchData();
     fetchVehicule();
-  }, []);
+  },[]);
 
   const handleCloseDialog = () => {
     setopenModal(false);
@@ -82,13 +91,13 @@ const Assurance = () => {
 
   // CREATE
 
-  const createAssurance= () => {
+  const createControleTechnique= () => {
     setisLoading(true);
     Api_client.post("controle/assurances/", {
-      vehicle: vehicule,
-      refference: refference,
-      description: description,
-      cout: cout,
+      vehicle: SelectVehicule,
+      reference: reference,
+      cost: cout,
+      expired_at: expired_at,
     })
       .then((response) => {
         setisLoading(false);
@@ -103,13 +112,13 @@ const Assurance = () => {
 
   // UPDATE
 
-  const updateAssurance= () => {
+  const updateControleTechnique= () => {
     setisLoading(true);
-    Api_client.put(`entretien/entretien/${id}`, {
+    Api_client.put(`controle/assurances/${id}`, {
       vehicle: vehiculeu,
-      refference: refferenceu,
-      description: descriptionu,
-      cout: coutu,
+      reference: referenceu,
+      cost: coutu,
+      expired_at: expired_atu,
     })
       .then((response) => {
         setisLoading(false);
@@ -124,12 +133,11 @@ const Assurance = () => {
 
   // DELETE
 
-  const deleteAssurance= (id) => {
+  const deleteControleTechnique= (id) => {
     setisLoading(true);
     Api_client.delete(`controle/assurances/${id}`)
       .then((response) => {
         fetchData();
-        console.log(response.data);
       })
       .catch((error) => {});
   };
@@ -142,7 +150,7 @@ const Assurance = () => {
   };
   const columns = [
     { field: "id", headerName: "ID" },
-
+   
     {
       field: "vehicle",
       headerName: "vehicle",
@@ -151,20 +159,20 @@ const Assurance = () => {
     },
   
     {
-      field: "refference",
-      headerName: "refference",
+      field: "reference",
+      headerName: "reference",
       flex: 1,
-      cellClassName: "refference-column--cell",
+      cellClassName: "reference-column--cell",
     },
     {
-      field: "description",
-      headerName: "description",
+      field: "expired_at",
+      headerName: "expired_at",
       flex: 1,
-      cellClassName: "description-column--cell",
+      cellClassName: "expired_at-column--cell",
     },
     {
-      field: "cout",
-      headerName: "cout",
+      field: "cost",
+      headerName: "cost",
       flex: 1,
       cellClassName: "cout-column--cell",
     },
@@ -180,17 +188,17 @@ const Assurance = () => {
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicle);
-              setRefferenceu(params.row.refference);
-              setDescriptionu(params.row.describution);
-              setCoutu(params.row.cout);
+              setVehiculeu(params.row.vehicle_id);
+              setReferenceu(params.row.reference);
+              setExpiredAt(params.row.expired_at);
+              setCoutu(params.row.cost);
             }}>
             <EditIcon />
           </IconButton>
 
           <IconButton
             onClick={() => {
-              deleteAssurance(params.row.id);
+              deleteControleTechnique(params.row.id);
             }}>
             <DeleteIcon />
           </IconButton>
@@ -211,7 +219,7 @@ const Assurance = () => {
           alignItems: "center",
           borderRadius: 5,
         }}>
-        <Header title='ASSURANCE' subtitle='liste des Assurance' />
+        <Header title='ASSURANCE' subtitle='liste des assurances faits' />
         <Button
          type="submit"
          color="secondary"
@@ -250,7 +258,7 @@ const Assurance = () => {
             color: `${colors.greenAccent[200]} !important`,
           },
         }}>
-        <DataGrid  rows={data} columns={columns} />
+        <DataGrid  rows={controleData} columns={columns} />
       </Box>
 
       <Modal open={openModal} onClose={handleClose}>
@@ -268,7 +276,7 @@ const Assurance = () => {
          
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
-            <Grid item xs={6}>
+              <Grid item xs={6}>
                 <FormControl fullWidth color='secondary' size='small'>
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
@@ -278,34 +286,40 @@ const Assurance = () => {
                       setSelectVehicule(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem key={item.make} value={item.make}>{item.make}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.make}/{item.license_plate}
+                        </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='reference'
+                  fullWidth
+                  color='secondary'
+                  size='small'
+                  onChange={(e) => {
+                    setReference(e.target.value);
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+          <TextField
+           label="expired_at"
+           type="date"
+           fullWidth
+           color="secondary"
+           size="small"
+           InputLabelProps={{
+           shrink: true,
+}}
 
-              <Grid item xs={6}>
-                <TextField
-                  label='refference'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setRefference(e.target.value);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='description'
-                  fullWidth
-                  color='secondary'
-                  size='small'
-                  onChange={(e) => {
-                    setDescription(e.target.value);
-                  }}
-                />
-              </Grid>
+         onChange={(e) => {
+         setExpiredAt(e.target.value);
+}}
+/>
+</Grid>
               <Grid item xs={6}>
                 <TextField
                   label='cout'
@@ -322,7 +336,7 @@ const Assurance = () => {
           </Box>
 
           <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createAssurance}>
+        <IconButton onClick={createControleTechnique}>
           <CheckIcon />
         </IconButton>
 
@@ -348,43 +362,49 @@ const Assurance = () => {
           <Typography variant='h3'>Entretien</Typography>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
-
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary' size='small'>
+                <FormControl fullWidth color='secondary'>
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
-                    value={SelectVehicule}
                     onChange={(e) => {
-                      setSelectVehicule(e.target.value);
+                      setVehicule(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>{item.id}</MenuItem>
+                      <MenuItem value={item.license_plate}>{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label='refference'
-                  value={refferenceu}
+                  label='reference'
+                  value={referenceu}
                   onChange={(e) => {
-                    setRefferenceu(e.target.value);
+                    setReferenceu(e.target.value);
                   }}
                   color='secondary'
                 />
               </Grid>
+
               <Grid item xs={6}>
-                <TextField
-                  label='Description'
-                  value={descriptionu}
-                  onChange={(e) => {
-                    setDescriptionu(e.target.value);
-                  }}
-                  color='secondary'
-                />
-              </Grid>
-              <Grid item xs={6}>
+          <TextField
+           label="expired_at"
+           type="date"
+           fullWidth
+           color="secondary"
+           size="small"
+           InputLabelProps={{
+           shrink: true,
+}}
+           value={expired_atu}
+
+         onChange={(e) => {
+         setExpiredAtu(e.target.value);
+}}
+/>
+</Grid>
+              <Grid item xs={12}>
                 <TextField
                   label='Cout'
                   value={coutu}
@@ -409,7 +429,7 @@ const Assurance = () => {
            
 <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
         <IconButton
-              onClick={updateAssurance}>
+              onClick={updateControleTechnique}>
               <CheckIcon />
         </IconButton>
             <IconButton
@@ -425,4 +445,4 @@ const Assurance = () => {
   );
 };
 
-export default Assurance;
+export default ControleTechnique;

@@ -10,17 +10,16 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useState, useEffect } from "react";
-import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
-import { MenuItem } from "react-pro-sidebar";
 import CheckIcon from "@mui/icons-material/Check";
 
 const Maintenance = () => {
@@ -38,6 +37,7 @@ const Maintenance = () => {
   const [total, setTotal] = useState();
   const [garage, setGarage] = useState();
   const [vehicule, setVehicule] = useState([]);
+  const [selectedVehicule, setSelectedVehicule] = useState()
 
   const [id, setid] = useState();
 
@@ -69,7 +69,7 @@ const Maintenance = () => {
   
   const fetchVehicule = () => {
     setisLoading(true);
-    Api_client.get("entretien/entretien/").then((response) => {
+    Api_client.get("vehicule/vehicule/").then((response) => {
       setisLoading(false);
       setVehicule(response.data);
     });
@@ -85,12 +85,24 @@ const Maintenance = () => {
     setopenModal(false);
   };
 
+  const maintenanceData = data.map((item) => ({
+    id: item.id, 
+    vehicle: item.vehicule_info.vehicule,
+    garage_name: item.garage_name,
+    panne: item.panne,
+    operation: item.operation,
+    main_oeuvre: item.main_oeuvre,
+    piece_rechange: item.piece_rechange,
+    cout_piece: item.cout_piece,
+    total: item.total,
+  }));
   // CREATE
 
   const createMaintenance= () => {
     setisLoading(true);
     Api_client.post("entretien/entretien/", {
-      vehicle: vehicule,
+      vehicle: selectedVehicule,
+      garage_name: garage,
       panne: panne,
       operation: operation,
       main_oeuvre: main_oeuvre,
@@ -160,7 +172,12 @@ const Maintenance = () => {
       flex: 1,
       cellClassName: "Vehicle-column--cell",
     },
-  
+    {
+      field: "garage_name",
+      headerName: "garage",
+      flex: 1,
+      cellClassName: "garage-column--cell",
+    },
     {
       field: "panne",
       headerName: "panne",
@@ -284,7 +301,7 @@ const Maintenance = () => {
             color: `${colors.greenAccent[200]} !important`,
           },
         }}>
-        <DataGrid  rows={data} columns={columns} />
+        <DataGrid  rows={maintenanceData} columns={columns} />
       </Box>
 
       <Modal open={openModal} onClose={handleClose}>
@@ -307,12 +324,12 @@ const Maintenance = () => {
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
-                    value={vehicule}
+                    value={selectedVehicule}
                     onChange={(e) => {
-                      setVehicule(e.target.value);
+                    setSelectedVehicule(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem key={item.make} value={item.make}>{item.make}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

@@ -16,7 +16,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useState, useEffect } from "react";
-import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -33,22 +32,23 @@ const ControleTechnique = () => {
   const [description, setDescription] = useState([]);
   const [cout, setCout] = useState();
   const [vehicule, setVehicule] = useState([]);
+  const [driver, setDriver] = useState([])
   const [SelectVehicule, setSelectVehicule] = useState("");
+  const [selectDriver, setSelectDriver] = useState()
 
   const [id, setid] = useState();
-
+  
   const [vehiculeu, setVehiculeu] = useState();
   const [coutu, setCoutu] = useState();
   const [descriptionu, setDescriptionu] = useState();
-  const [SelectVehiculeu, setSelectVehiculeu] = useState("");
+  const [driveru, setDriveru] = useState()
 
-  
   const [data, setdata] = useState([]);
-  const [CarburantData, setCarburantData] = useState([]);
+  
 
   const fetchData = () => {
     setisLoading(true);
-    Api_client.get("controle/assurances/")
+    Api_client.get("controle/controle-techniques/")
       .then((response) => {
         setisLoading(false);
         setopenModal(false);
@@ -59,23 +59,32 @@ const ControleTechnique = () => {
       });
   };
 
-
-  
+  const fetchDriver = () => {
+    setisLoading(true);
+    Api_client.get("parametrage/personnelle/")
+    .then((response) => {
+      setisLoading(false);
+      setDriver(response.data);
+    });
+  }
+  console.log(driver)
   const fetchVehicule = () => {
     setisLoading(true);
-    Api_client.get("vehicle/vehicle/").then((response) => {
+    Api_client.get("vehicule/vehicule/").then((response) => {
       setisLoading(false);
       setVehicule(response.data);
     });
   };
 
-  const mouvementData = CarburantData.map(item =>
+  const controleData = data.map(item =>
 
     ({
       id:item.id,
-      vehicule:item.vehicule_info.vehicule,
+      driver_name: item.driver_info.driver,
+      vehicle:item.vehicule_info.vehicule,
+      vehicle_id: item.vehicle,
       description: item.description,
-      cout: item.cout,
+      cost: item.cost,
     
     } ) 
     
@@ -84,6 +93,7 @@ const ControleTechnique = () => {
   useEffect(() => {
     fetchData();
     fetchVehicule();
+    fetchDriver();
   }, []);
 
   const handleCloseDialog = () => {
@@ -95,9 +105,10 @@ const ControleTechnique = () => {
   const createControleTechnique= () => {
     setisLoading(true);
     Api_client.post("controle/controle-techniques/", {
-      vehicle: vehicule,
+      driver_name: selectDriver,
+      vehicle: SelectVehicule,
       description: description,
-      cout: cout,
+      cost: cout,
     })
       .then((response) => {
         setisLoading(false);
@@ -117,7 +128,7 @@ const ControleTechnique = () => {
     Api_client.put(`controle/controle-techniques/${id}`, {
       vehicle: vehiculeu,
       description: descriptionu,
-      cout: coutu,
+      cost: coutu,
     })
       .then((response) => {
         setisLoading(false);
@@ -137,7 +148,6 @@ const ControleTechnique = () => {
     Api_client.delete(`controle/controle-techniques/${id}`)
       .then((response) => {
         fetchData();
-        console.log(response.data);
       })
       .catch((error) => {});
   };
@@ -150,7 +160,13 @@ const ControleTechnique = () => {
   };
   const columns = [
     { field: "id", headerName: "ID" },
-
+    {
+      field: "driver_name",
+      headerName: "Driver",
+      flex: 1,
+      cellClassName: "driver_name-column--cell",
+    },
+  
     {
       field: "vehicle",
       headerName: "vehicle",
@@ -165,8 +181,8 @@ const ControleTechnique = () => {
       cellClassName: "description-column--cell",
     },
     {
-      field: "cout",
-      headerName: "cout",
+      field: "cost",
+      headerName: "cost",
       flex: 1,
       cellClassName: "cout-column--cell",
     },
@@ -182,9 +198,10 @@ const ControleTechnique = () => {
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicle);
+              setDriveru(params.row.driver);
+              setVehiculeu(params.row.vehicle_id);
               setDescriptionu(params.row.description);
-              setCoutu(params.row.cout);
+              setCoutu(params.row.cost);
             }}>
             <EditIcon />
           </IconButton>
@@ -251,7 +268,7 @@ const ControleTechnique = () => {
             color: `${colors.greenAccent[200]} !important`,
           },
         }}>
-        <DataGrid  rows={CarburantData} columns={columns} />
+        <DataGrid  rows={controleData} columns={columns} />
       </Box>
 
       <Modal open={openModal} onClose={handleClose}>
@@ -271,6 +288,23 @@ const ControleTechnique = () => {
             <Grid container spacing={2} item xs={12} alignItems='center'>
             <Grid item xs={6}>
                 <FormControl fullWidth color='secondary' size='small'>
+                  <InputLabel id='driver_name'>Driver</InputLabel>
+                  <Select
+                    label='Driver'
+                    value={selectDriver}
+                    onChange={(e) => {
+                      setSelectDriver(e.target.value);
+                    }}>
+                    {driver.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.nom}
+                        </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth color='secondary' size='small'>
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
@@ -279,7 +313,9 @@ const ControleTechnique = () => {
                       setSelectVehicule(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>{item.id}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.make}/{item.license_plate}
+                        </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -337,7 +373,23 @@ const ControleTechnique = () => {
           <Typography variant='h3'>Entretien</Typography>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
-
+            <Grid item xs={6}>
+                <FormControl fullWidth color='secondary'>
+                  <InputLabel id='vehicle'>Vehicle</InputLabel>
+                  <Select
+                    label='Vehicle'
+                    value={driveru}
+                    onChange={(e) => {
+                      setDriveru(e.target.value);
+                    }}>
+                    {driver.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.name}
+                        </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
             <Grid item xs={6}>
                 <FormControl fullWidth color='secondary'>
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
