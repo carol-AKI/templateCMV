@@ -22,6 +22,8 @@ import Insurance from "./scenes/insurance";
 import TechnicalControl from "./scenes/TechnicalControl";
 import Maintenance from "./scenes/Maintenance";
 import Vehicles from "./scenes/vehicles";
+import Login from "./scenes/Login";
+
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -35,7 +37,8 @@ function App() {
           <main className="content">
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/team" element={<Team />} />
               <Route path="/vehicles" element={<Vehicles />} />
               <Route path="/invoices" element={<Invoices />} />

@@ -7,10 +7,10 @@ import { Typography,
          DialogTitle, 
          IconButton,
          TextField,
-         Modal,
          Menu, 
          MenuItem, 
          InputLabel,
+         Modal,
          Select} from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -27,8 +27,8 @@ import { Api_client } from "../../data/Api";
 const Vehicles = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [openModal, setopenModal] = useState(false);
   const [openModalu, setopenModalu] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRowId, setSelectedRowId] = useState(null);
@@ -38,17 +38,27 @@ const Vehicles = () => {
   const [typeCarburant, setTypeCarburant] = useState('ESSENCE'); 
   const [licensePlate, setLicensePlate] = useState();
   
-  const [makeu, setMakeu] = useState();
-  const [modelu, setModelu] = useState();
-  const [numeroChassiu, setNumeroChassiu] = useState();
-  const [typeCarburantu, setTypeCarburantu] = useState('ESSENCE'); 
-  const [licensePlateu, setLicensePlateu] = useState();
+  const [makeu, setMakeu] = useState('');
+  const [modelu, setModelu] = useState('');
+  const [numeroChassiu, setNumeroChassiu] = useState('');
+  const [licensePlateu, setLicensePlateu] = useState('');
+  const [typeCarburantu, setTypeCarburantu] = useState('');
 
   const [isLoading, setIsLoading] = useState(false)
   const [vehicule, setVehicule] = useState([])
   const [id, setId] = useState()
   const [data, SetData] = useState([]);
   const navigate = useNavigate(); 
+
+  const [checkedItems, setCheckedItems] = useState({
+    Eau: false,
+    Lubrifiant: false,
+    Freins: false
+  });
+
+  const handleCheckboxChange = (event) => {
+    setCheckedItems({ ...checkedItems, [event.target.name]: event.target.checked });
+  };
   
   const fetchData = () => {
     setIsLoading(true);
@@ -67,7 +77,8 @@ const Vehicles = () => {
   }
 
   useEffect(() => {
-    fetchData() 
+    fetchData();
+    fetchVehiculeInfo() 
   }, []);
   
   const handleCloseDialog = () => {
@@ -78,16 +89,43 @@ const Vehicles = () => {
   };
 
 
+  const handleButtonClick = () => {
+    setStatusDialogOpen(false);
+    Api_client.post('course/verification/', {
+      vehicule_id: selectedRowId,
+      Eau: checkedItems.Eau,
+      Lubrifiant: checkedItems.Lubrifiant,
+      Freins: checkedItems.Freins
+    })
+      .then(response => {
+      })
+      .catch(error => {
+      });
+  };
+
   const handleMenuClick = (event, id) => {
     setAnchorEl(event.currentTarget);
     setSelectedRowId(id);
   };
 
+
+  const handleMenudClick = () => {
+    setStatusDialogOpen(true);
+  };
+
+  
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedRowId(null);
   };
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const handleCloseu = () => {
+    setopenModalu(false);
+  };
+  const handleDialogClose = () => {
+    setStatusDialogOpen(false);
+  };
+  
  
 const handleActionClick = () => {
  
@@ -95,9 +133,6 @@ const handleActionClick = () => {
   
   };
   
-
-
-
   const createVehicule= () => {
     setIsLoading(true);
     Api_client.post("vehicule/vehicule/", {
@@ -119,26 +154,39 @@ const handleActionClick = () => {
       });
   };
 
-
   const updateVehicule= () => {
     setIsLoading(true);
-    Api_client.post("vehicule/vehicule/", {
+    Api_client.put(`vehicule/vehicule/${id}/`, {
     make: makeu,
     model: modelu,
     numero_chassi: numeroChassiu,
     license_plate: licensePlateu,
     type_carburant: typeCarburantu,
     })
-      .then((response) => {
-        setIsLoading(false);
-        setopenModal(false);
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {
-       setIsLoading(false);
-      });
-  };
+    .then((response) => {
+      setIsLoading(false);
+      setopenModalu(false);
+      fetchData();
+    })
+    .catch((error) => {
+      setIsLoading(false);
+    });
+};
+
+  const handleUpdateClick = (id) => {
+
+  const selectedVehicle = data.find(vehicle => vehicle.id === id);
+  setMakeu(selectedVehicle.make);
+  setModelu(selectedVehicle.model);
+  setNumeroChassiu(selectedVehicle.numero_chassi);
+  setLicensePlateu(selectedVehicle.license_plate);
+  setTypeCarburantu(selectedVehicle.type_carburant);
+  setId(id)
+
+  ; 
+  setopenModalu(true);
+};
+     //DELETE VEHICLE
   const deleteVehicule= (id) => {
     setIsLoading(true);
     Api_client.delete(`vehicule/vehicule/${id}/`)
@@ -148,12 +196,6 @@ const handleActionClick = () => {
       })
       .catch((error) => {});
   };
-
-
-  const handleCloseu = () => {
-    setopenModalu(false);
-  };
-
 
 
   const columns = [
@@ -190,11 +232,12 @@ const handleActionClick = () => {
             aria-haspopup="true"
             style={{ marginLeft: "auto" }}
             onClick={(event) => handleMenuClick(event, params.row.id)}
+            params={params} 
           >
             <MoreVertIcon />
           </IconButton>
         </>
-      ),
+      )
     },
   ];
 
@@ -244,21 +287,30 @@ const handleActionClick = () => {
           },
         }}
       >
-
-<Dialog open={statusDialogOpen} onClose={() => setStatusDialogOpen(false)}>
+<Dialog open={statusDialogOpen} onClose={handleDialogClose}>
   <DialogTitle>Vehicle Status</DialogTitle>
   <DialogContent>
     <FormControl>
       <FormGroup>
-        <FormControlLabel control={<Checkbox />} label="Eau" />
-        <FormControlLabel control={<Checkbox />} label="Lubrifiant" />
-        <FormControlLabel control={<Checkbox />} label="Contrôle technique" />
-        <FormControlLabel control={<Checkbox />} label="Freins" />
+        <FormControlLabel
+          control={<Checkbox checked={checkedItems.Eau} onChange={handleCheckboxChange} name="Eau" />}
+          label="Eau"
+        />
+        <FormControlLabel
+          control={<Checkbox checked={checkedItems.Lubrifiant} onChange={handleCheckboxChange} name="Lubrifiant" />}
+          label="Lubrifiant"
+        />
+        <FormControlLabel
+          control={<Checkbox checked={checkedItems.Freins} onChange={handleCheckboxChange} name="Freins" />}
+          label="Freins"
+        />
       </FormGroup>
     </FormControl>
+    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+      <Button onClick={() => handleButtonClick(selectedRowId)}>OK</Button>
+    </div>
   </DialogContent>
 </Dialog>
-
         <DataGrid
           rows={data}
           columns={columns}
@@ -356,8 +408,7 @@ const handleActionClick = () => {
   </DialogContent>
 </Dialog>
 
-
-<Modal open={openModalu} onClose={handleCloseu}>
+<Modal open={openModalu} >
         <Box
           sx={{
             position: "absolute",
@@ -408,7 +459,17 @@ const handleActionClick = () => {
                   label='LicensePlate'
                   value={licensePlateu}
                   onChange={(e) => {
-                    setLicensePlate(e.target.value);
+                    setLicensePlateu(e.target.value);
+                  }}
+                  color='secondary'
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='TypeCarburant'
+                  value={typeCarburantu}
+                  onChange={(e) => {
+                    setTypeCarburantu(e.target.value);
                   }}
                   color='secondary'
                 />
@@ -431,7 +492,7 @@ const handleActionClick = () => {
           <CheckIcon />
         </IconButton>
 
-        <IconButton onClick={handleCloseDialog}>
+        <IconButton onClick={handleCloseu}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -439,19 +500,14 @@ const handleActionClick = () => {
         </Box>
       </Modal>
 
-
-
-
-
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} onChange={(e)=> {handleActionClick (e)
-      console.log(e.target.value)
-      }}>
+    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} onChange={(e)=> {handleActionClick (e)
+         console.log(e.target.value)
+}}>
         <MenuItem value= "ViewDetails" onClick={handleActionClick} >View Details</MenuItem>
-        <MenuItem onClick={() => ("Vehicle Status")}>Vehicle Status</MenuItem>
-        <MenuItem onClick={() => updateVehicule("Rename")}>Rename</MenuItem>
+        <MenuItem onClick={() => handleMenudClick(selectedRowId)}>Vehicle Status</MenuItem>
+        <MenuItem onClick={() => handleUpdateClick(selectedRowId)}>Update</MenuItem>
         <MenuItem onClick={() => deleteVehicule(selectedRowId)}>Delete</MenuItem>
-      </Menu>
-      
+    </Menu>
     </Box>
   );
 };

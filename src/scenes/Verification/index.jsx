@@ -1,55 +1,164 @@
-import React, { useState } from "react";
 import {
   Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
+  useTheme,
   IconButton,
-  Menu,
-  MenuItem,
 } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { tokens } from "../../theme";
-import { mockDataContacts } from "../../data/mockData";
-import Header from "../../components/Header";
-import { useTheme } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 
-const VehicleDetail = () => {
+
+import { DataGrid } from "@mui/x-data-grid";
+import { tokens } from "../../theme";
+import Header from "../../components/Header";
+import { useState, useEffect } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Api_client } from "../../data/Api";
+
+const Verification = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [open, setOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [openModal, setopenModal] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedRowId(null);
+  const [vehicle, setVehicle] = useState([]);
+  const [data, setData] = useState([])
+  
+  const fetchData = () => {
+    setisLoading(true);
+    Api_client.get("course/verification")
+      .then((response) => {
+        setisLoading(false);
+        setopenModal(false);
+        setData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        setisLoading(false);
+      });
   };
 
-  const handleActionClick = (action) => {
-    console.log(`Clicked on ${action} for row with id: ${selectedRowId}`);
-    handleMenuClose();
+  const VerificationData = data.map(item =>
+
+    ({
+      id:item.id,
+      vehicle:item.vehicule_info.vehicule,
+      eau:item.eau,
+      lubrifiant: item.lubrifiant,
+      frein: item.frein,
+      
+    })
+  );
+
+
+  const fetchVehicule = () => {
+    setisLoading(true);
+    Api_client.get('vehicule/vehicule/')
+      .then((response) => {
+        setisLoading(false);
+        setopenModal(false);
+        setVehicle(response.data);
+             })
+        .catch((error) => {
+          setisLoading(false);
+        });
+  };
+
+  useEffect(() => {
+    fetchData();
+    fetchVehicule();
+  }, []);
+
+  // DELETE
+
+  const deleteVerification = (id) => {
+
+    setisLoading(true);
+    Api_client.delete(`course/verification/${id}/`)
+      .then((response) => {
+        fetchData();
+        console.log(response.data);
+      })
+      .catch((error) => {});
   };
 
   const columns = [
-    { field: "registrarId", headerName: "Vehicle ID" },
-    { field: "name", headerName: "Make", flex: 1, cellClassName: "name-column--cell" },
-    { field: "email", headerName: "Model", flex: 1 },
-    { field: "address", headerName: "License Plate", flex: 1 },
-    { field: "phone", headerName: "Car Chassis Number", flex: 1 },
+    {
+      field: "vehicle",
+      headerName: "Vehicule",
+      flex: 1,
+      cellClassName: "name-column--cell",
+    },
+    
+    {
+      field: "eau",
+      headerName: "Eau",
+      flex: 1,
+      cellClassName: "Eau-column--cell",
+      renderCell: (params) => {
+        const cellValue = params.row.eau;
+        const texte = cellValue === true ? "Verifiee" : cellValue === false ? "Non Verifiee": "";
+        return <span>{texte}</span>
+      }
+    },
+  
+    
+    {
+      field: "lubrifiant",
+      headerName: "Lubrifiant",
+      flex: 1,
 
+      cellClassName: "Lubrifiant-column--cell",
+      renderCell: (params) => {
+        const cellValue = params.row.lubrifiant;
+        const texte = cellValue === true ? "Verifiee" : cellValue === false ? "Non Verifiee": "";
+        return <span>{texte}</span>
+      }
+    },
+    {
+      field: "frein",
+      headerName: "frein",
+      flex: 1,
+      cellClassName: "Frein-column--cell",
+      renderCell: (params) => {
+        const cellValue = params.row.frein;
+        const texte = cellValue === true ? "Verifiee" : cellValue === false ? "Non Verifiee": "";
+        return <span>{texte}</span>
+      }
+    },
+
+    {
+      field: "actions",
+      headerName: "Actions",
+      // width: "50%",
+      align: "right",
+      renderCell: (params) => (
+        <div>
+          <IconButton
+            onClick={() => {
+              deleteVerification(params.row.id);
+            }}>
+            <DeleteIcon />
+          </IconButton>
+        </div>
+      ),
+    },
   ];
 
   return (
-    <Box m="20px">
-      <Header title="VEHICLE STATUS"/>
+    <Box m='20px'>
       <Box
-        m="40px 0 0 0"
-        height="75vh"
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          padding: 2,
+          alignItems: "center",
+          borderRadius: 5,
+        }}>
+
+        <Header title='Etat du voiture 'subtitle='Liste des enregistrements' />
+      </Box>
+      <Box
+        m='40px 0 0 0'
+        height='75vh'
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
@@ -74,21 +183,13 @@ const VehicleDetail = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-          rows={mockDataContacts}
-          columns={columns}
-          components={{
-            Toolbar: GridToolbar,
-          }}
-        />
+        }}>
+        <DataGrid rows={VerificationData} columns={columns} />
       </Box>
+
+  
     </Box>
   );
 };
 
-export default VehicleDetail;
+export default Verification;

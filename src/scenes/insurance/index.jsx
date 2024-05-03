@@ -72,7 +72,7 @@ const ControleTechnique = () => {
       id:item.id,
       vehicle:item.vehicule_info.vehicule,
       vehicle_id: item.vehicle,
-      expired_at: item.expired_at,
+      remaining: item.remaining,
       reference: item.reference,
       cost: item.cost,
     
@@ -165,10 +165,10 @@ const ControleTechnique = () => {
       cellClassName: "reference-column--cell",
     },
     {
-      field: "expired_at",
-      headerName: "expired_at",
+      field: "remaining",
+      headerName: "remaining",
       flex: 1,
-      cellClassName: "expired_at-column--cell",
+      cellClassName: "remaining-column--cell",
     },
     {
       field: "cost",

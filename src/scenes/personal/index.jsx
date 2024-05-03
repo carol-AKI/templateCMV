@@ -96,12 +96,12 @@ const formData = {
       flex: 1,
     },
     {
-      field: "address",
+      field: "adresse",
       headerName: "Address",
       flex: 1,
     },
     {
-      field: "phone",
+      field: "telephone",
       headerName: "Phone Number",
       flex: 1,
     },
