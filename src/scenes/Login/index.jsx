@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [email, setEmail] = useState('');
+const Login = ({ onLogin }) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logique de connexion ici (par exemple, appel à une API)
-
-    // Réinitialisation des champs du formulaire
-    setEmail('');
-    setPassword('');
-  };
-
+    try {
+    const response = await axios.post('http://127.0.0.1:8001/api/auth/login/', {
+    username: username,
+    password: password,
+    });
+    if (response.status === 200) {
+    localStorage.setItem('token', response.data.token);
+    onLogin();
+    navigate('/vehicles'); 
+    }
+    } catch (error) {
+    if (error.response && error.response.status === 400) {
+    alert('Mot de passe est incorrect');
+    } else {
+    console.log('Error logging in:', error);
+    }
+    }
+    };
   return (
     <div
       style={{
@@ -32,14 +46,14 @@ const Login = () => {
       }}
     >
       <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Connexion</h2>
-      <form onSubmit={handleSubmit} style={{ flex: 1 }}>
+      <form style={{ flex: 1 }}>
         <div style={{ marginBottom: '10px' }}>
           <label htmlFor="email">Email:</label>
           <input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             style={{ width: '100%', padding: '5px' }}
           />
         </div>
@@ -56,6 +70,7 @@ const Login = () => {
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
             type="submit"
+            onClick={handleSubmit}
             style={{
               backgroundColor: '#4caf50',
               color: 'black',
