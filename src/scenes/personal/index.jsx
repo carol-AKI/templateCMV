@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Typography,
-  Grid,
-  Select,
-  FormControl,
-  InputLabel,
-  MenuItem
+Box,
+Button,
+Dialog,
+DialogContent,
+IconButton,
+Typography,
+Grid,
+Select,
+FormControl,
+InputLabel,
+MenuItem,
+TextField,
+Modal,
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -20,229 +21,524 @@ import { useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import { Api_client } from "../../data/Api";
-
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const Personal = () => {
 const theme = useTheme();
 const colors = tokens(theme.palette.mode);
 const [open, setOpen] = useState(false);
-const [nom, setNom] = useState();
-const [prenom, setPrenom] = useState();
-const [adresse, setAdresse] = useState();
-const [telephone, setTelephone] = useState();
-const [email, setEmail] = useState();
-const [intitule, setIntitule] = useState([]);
+const [nom, setNom] = useState('');
+const [prenom, setPrenom] = useState('');
+const [adresse, setAdresse] = useState('');
+const [telephone, setTelephone] = useState('');
+const [email, setEmail] = useState('');
+const [intitule, setIntitule] = useState('');
+
+const [openModalu, setopenModalu] = useState(false);
+const [nomu, setNomu] = useState('');
+const [prenomu, setPrenomu] = useState('');
+const [adresseu, setAdresseu] = useState('');
+const [telephoneu, setTelephoneu] = useState('');
+const [emailu, setEmailu] = useState('');
+const [intituleu, setIntituleu] = useState('');
 const [isLoading, setIsLoading] = useState(false);
 const [data, setData] = useState([]);
-
-
+const [id, setId] = useState();
 const fetchData = () => {
-  setIsLoading(true);
-  Api_client.get("parametrage/personnelle/").then((response) => {
-    setIsLoading(false);
-    setData(response.data)
-    setIntitule(response.data)
-  })
+      setIsLoading(true);
+                   Api_client.get("parametrage/personnelle/").then((response) => {
+      setIsLoading(false);
+      setData(response.data);
+      setIntitule(response.data);
+    
+});
 };
 
-useEffect(() => {
-  fetchData();
+      useEffect(() => {
+      fetchData();
 }, []);
 
 const handleOpenDialog = () => {
-  setOpen(true);
+      setOpen(true);
+};
+const handleCloseu = () => {
+  setopenModalu(false);
+};
+
+const handleSetDialog = () => {
+      setOpen(false);
+      submitForm(formData);
 };
 
 const handleCloseDialog = () => {
-  setOpen(false);
-  submitForm(formData);
+      setOpen(false);
 };
+
 
 const submitForm = async (formData) => {
   try {
-    Api_client.post("parametrage/personnelle/",
-      formData
-    );
-  } catch (error) {
-    console.error(error);
+  const response = await Api_client.post("parametrage/personnelle/", formData);
+  if (response.status !== 200) {
+  throw new Error("Une erreur est survenue lors de la soumission du formulaire.");
   }
-};
+  } catch (error) {
+  console.error(error);
+  alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+  }
+  };
 
 const formData = {
-  nom: nom,
-  prenom: prenom,
-  adresse: adresse,
-  telephone: telephone,
-  email: email,
-  intitule: intitule,
+      nom: nom,
+      prenom: prenom,
+      adresse: adresse,
+      telephone: telephone,
+      email: email,
+      intitule: intitule,
 };
 
 
-  const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
-    {
-      field: "nom",
-      headerName: "Name",
-      flex: 1,
-    },
-    {
-      field: "prenom",
-      headerName: "Surname",
-      flex: 1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    {
-      field: "adresse",
-      headerName: "Address",
-      flex: 1,
-    },
-    {
-      field: "telephone",
-      headerName: "Phone Number",
-      flex: 1,
-    },
-    {
-      field: "intitule",
-      headerName: "intitule",
-      flex: 1,
-    },
-  ];
+ // CREATE
 
-  return (
-    <Box m="20px">
-      <Header title="PERSONAL" subtitle="Personal list" />
-      <Box display="flex" justifyContent="flex-end" mt="10px">
-      <Button
-  type="submit"
-  color="secondary"
-  variant="contained"
-  style={{ marginRight: '10px', marginBottom: '-30px' }}
-  onClick={handleOpenDialog}
+ const createPersonnelle= () => {
+  setIsLoading(true);
+  Api_client.post("parametrage/personnelle/", {
+    nom: nom,
+    prenom: prenom,
+    adresse: adresse,
+    telephone: telephone,
+    email: email,
+    intitule: intitule,
+  })
+    .then((response) => {
+      setIsLoading(false);
+      fetchData();
+      console.log(response.data);
+      handleCloseDialog(); 
+    })
+    .catch((error) => {
+      setIsLoading(false);
+    });
+};
+
+// UPDATE
+
+const updatePersonnelle = () => {
+  setIsLoading(true);
+  Api_client.put(`parametrage/personnelle/${id}/`, {
+  nom: nomu,
+  prenom: prenomu,
+  adresse: adresseu,
+  telephone: telephoneu,
+  email: emailu,
+  intitule: intituleu,
+  })
+  .then((response) => {
+  setIsLoading(false);
+  setopenModalu(false);
+  fetchData();
+  console.log(response.data);
+  })
+  .catch((error) => {
+  setIsLoading(false);
+  console.error(error);
+  });
+  };
+
+  // DELETE
+
+  const deletePersonnelle = (id) => {
+    const updatedData = data.filter((item) => item.id !== id);
+    setData(updatedData);
+  };
+
+
+const columns = [
+            {
+     field: "nom",
+     headerName: "Nom",
+     flex: 1,
+             },
+   {
+    field: "prenom",
+    headerName: "Prenom",
+    flex: 1,
+  },
+{
+    field: "email",
+    headerName: "Email",
+    flex: 1,
+  },
+{
+    field: "adresse",
+    headerName: "Addresse",
+    flex: 1,
+},
+{
+    field: "telephone",
+    headerName: "Numero de telephone",
+    flex: 1,
+},
+{
+    field: "intitule",
+    headerName: "Intitule",
+    flex: 1,
+},
+{
+  field: "actions",
+  headerName: "Actions",
+  // width: "50%",
+  align: "right",
+  renderCell: (params) => (
+    <div>
+      <IconButton
+        onClick={() => {
+          setopenModalu(true);
+          setId(params.row.id);
+          setNomu(params.row.nom);
+          setPrenomu(params.row.prenom);
+          setTelephoneu(params.row.telephone);
+          setAdresseu(params.row.adresse);
+          setEmailu(params.row.email);
+          setIntituleu(params.row.intitule);
+         
+        }}>
+        <EditIcon />
+      </IconButton>
+
+      <IconButton
+        onClick={() => {
+          deletePersonnelle(params.row.id);
+        }}>
+        <DeleteIcon />
+      </IconButton>
+    </div>
+  ),
+},
+ ];
+
+return (
+        <Box m="20px">
+        <Header title="PERSONAL" subtitle="Personal list" />
+        <Box display="flex" justifyContent="flex-end" mt="10px">
+<Button
+      type="submit"
+      color="secondary"
+      variant="contained"
+      style={{ marginRight: '10px', marginBottom: '-30px' }}
+      onClick={handleOpenDialog}
 >
-  Create
+                Create
 </Button>
-      </Box>
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            cursor: "pointer",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-         rows={data}
+         </Box>
+         <Box
+             m="40px 0 0 0"
+             height="75vh"
+             sx={{
+             "& .MuiDataGrid-root": {
+             border: "none",
+},
+"& .MuiDataGrid-cell": {
+                         borderBottom: "none",
+                         whiteSpace: "nowrap",
+                         overflow: "hidden",
+                         textOverflow: "ellipsis",
+                         cursor: "pointer",
+},
+"& .name-column--cell": {
+                          color: colors.greenAccent[300],
+},
+"& .MuiDataGrid-columnHeaders": {
+                                  backgroundColor: colors.blueAccent[700],
+                                  borderBottom: "none",
+},
+"& .MuiDataGrid-virtualScroller": {
+                                    backgroundColor: colors.primary[400],
+},
+"& .MuiDataGrid-footerContainer": {
+                                     borderTop: "none",
+                                     backgroundColor: colors.blueAccent[700],
+},
+"& .MuiCheckbox-root": {
+                        color: `${colors.greenAccent[200]} !important`,
+},
+"& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                                                     color: `${colors.grey[100]} !important`,
+},
+}}
+>
+<DataGrid
+          rows={data}
           columns={columns}
           components={{ Toolbar: GridToolbar }}
-        />
-      </Box>
-      <Dialog open={open} onClose={handleCloseDialog} sx={{ "& .MuiDialog-paper": { width: "15cm", height: "10cm" } }}>
-      <DialogTitle>
-    <Box display="flex" justifyContent="center">
-      <Typography variant="h2" component="div" fontWeight="bold">
-        Create New Personnel
-      </Typography>
-    </Box>
-  </DialogTitle>
-  <DialogContent>
-    <form style={{ width: "100%", height: "80%" }}>
-      <Grid container spacing={1} style={{ height: "100%", marginTop: "20px" }}>
-        <Grid item xs={6}>
-          <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>Name</Typography>
-            <input onChange={(e) => setNom(e.target.value)} 
-            type="text" placeholder="Name" style={{ width: "90%", height: "40%" }} />
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>Surname</Typography>
-            <input onChange={(e) => setPrenom(e.target.value)}
-            type="text" placeholder="surname" style={{ width: "100%", height: "40%" }} />
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>Phone number</Typography>
-            <input onChange={(e) => setTelephone(e.target.value)}
-            type="text" placeholder="your phone number" style={{ width: "90%", height: "40%" }} />
-          </Box>
-          </Grid>
-          <Grid item xs={6}>
-          <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>Adress</Typography>
-            <input onChange={(e) => setAdresse(e.target.value)}
-            type="text" placeholder="adress" style={{ width: "90%", height: "40%" }} />
-          </Box>
-          </Grid>
-          <Grid item xs={6}>
-          <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px" }}>mail</Typography>
-            <input onChange={(e) => setEmail(e.target.value)}
-            type="text" placeholder="dogo@gmail.com" style={{ width: "90%", height: "40%" }} />
-          </Box>
-        </Grid>
-        <Grid item xs={6} style={{marginTop:"30px"}}>
-                <FormControl fullWidth color='secondary' size='small'>
-                  <InputLabel id='intitule'>Intitule</InputLabel>
-                  <Select
-                    label='Intitule'
-                    onChange={(e) => {
-                      setIntitule(e.target.value);
-                    }}>
-                    
-                      <MenuItem value="demandeur">demandeur</MenuItem>
-                      <MenuItem value="conducteur">conducteur</MenuItem>
-                  
-                  </Select>
-                </FormControl>
-              </Grid>
-      </Grid>
-      <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-        <IconButton onClick={handleCloseDialog}>
-          <CheckIcon />
-        </IconButton>
-      </Box>
-    </form>
-  </DialogContent>
-</Dialog>
-    </Box>
-  );
+/>
+</Box>
+<Modal open={open} onClose={handleCloseDialog}>
+     <Box
+         sx={{
+         position: "absolute",
+         top: "50%",
+         left: "50%",
+         transform: "translate(-50%, -50%)",
+         width: 700,
+         bgcolor: "#1f2a40",
+         boxShadow: 24,
+         p: 4,
+         borderRadius: '10px',
+}}
+>
+<Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+   <Typography variant="h2" component="div">
+        Creation Personnelle
+   </Typography>
+  </Box>
+ <Box margin={2}>
+<Grid container spacing={2} item xs={12} alignItems='center'>
+<Grid item xs={6}>
+<TextField
+         label='nom'
+         fullWidth
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setNom(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+<TextField
+         label='prenom'
+         fullWidth
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setPrenom(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+         <TextField
+         label='telephone'
+         fullWidth
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setTelephone(e.target.value);
+         }}
+/>
+</Grid>
+<Grid item xs={6}>
+<TextField
+         label='adresse'
+         fullWidth
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setAdresse(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+<TextField
+          label='mail'
+          fullWidth
+          color='secondary'
+          size='small'
+          onChange={(e) => {
+          setEmail(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+<FormControl fullWidth color='secondary' size='small'>
+<InputLabel id='intitule'>Intitule</InputLabel>
+<Select
+label='Intitule'
+onChange={(e) => {
+setIntitule(e.target.value);
+}}
+>
+<MenuItem value="demandeur">demandeur</MenuItem>
+<MenuItem value="conducteur">conducteur</MenuItem>
+</Select>
+</FormControl>
+</Grid>
+<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+<IconButton
+onClick={createPersonnelle}
+sx={{
+'&:hover': {
+backgroundColor: '#4cceac',
+},
+}}
+>
+<CheckIcon />
+</IconButton>
+<IconButton
+onClick={handleCloseDialog}
+sx={{
+'&:hover': {
+backgroundColor: 'red',
+},
+}}
+>
+<CloseIcon />
+</IconButton>
+</Box>
+  </Grid>
+ </Box>
+   </Box>
+     </Modal>
+
+
+     <Modal open={openModalu} onClose={handleCloseu}>
+     <Box
+         sx={{
+         position: "absolute",
+         top: "50%",
+         left: "50%",
+         transform: "translate(-50%, -50%)",
+         width: 700,
+         bgcolor: "#1f2a40",
+         boxShadow: 24,
+         p: 4,
+         borderRadius: '10px',
+}}
+>
+<Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+   <Typography variant="h2" component="div">
+        Editer Personnelle
+   </Typography>
+  </Box>
+ <Box margin={2}>
+<Grid container spacing={2} item xs={12} alignItems='center'>
+<Grid item xs={6}>
+<TextField
+         label='nom'
+         fullWidth
+         value={nomu}
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setNomu(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+<TextField
+         label='prenom'
+         fullWidth
+         value={prenomu}
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setPrenomu(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+         <TextField
+         label='telephone'
+         fullWidth
+         value={telephoneu}
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setTelephoneu(e.target.value);
+         }}
+/>
+</Grid>
+<Grid item xs={6}>
+<TextField
+         label='adresse'
+         fullWidth
+         value={adresseu}
+         color='secondary'
+         size='small'
+         onChange={(e) => {
+         setAdresseu(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+<TextField
+          label='mail'
+          fullWidth
+          value={emailu}
+          color='secondary'
+          size='small'
+          onChange={(e) => {
+          setEmailu(e.target.value);
+}}
+/>
+</Grid>
+<Grid item xs={6}>
+<FormControl fullWidth color='secondary' size='small'>
+<InputLabel id='intitule'>Intitule</InputLabel>
+<Select
+label='Intitule'
+value={intituleu}
+onChange={(e) => {
+setIntituleu(e.target.value);
+}}
+>
+<MenuItem value="demandeur">demandeur</MenuItem>
+<MenuItem value="conducteur">conducteur</MenuItem>
+</Select>
+</FormControl>
+</Grid>
+<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+<IconButton
+onClick={updatePersonnelle}
+sx={{
+'&:hover': {
+backgroundColor: '#4cceac',
+},
+}}
+>
+<CheckIcon />
+</IconButton>
+<IconButton
+onClick={handleCloseu}
+sx={{
+'&:hover': {
+backgroundColor: 'red',
+},
+}}
+>
+<CloseIcon />
+</IconButton>
+</Box>
+  </Grid>
+ </Box>
+   </Box>
+     </Modal>
+        </Box>
+);
 };
 
 export default Personal;

@@ -22,7 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
 import CheckIcon from "@mui/icons-material/Check";
 
-const ControleTechnique = () => {
+const Assurance = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -33,10 +33,9 @@ const ControleTechnique = () => {
   const [expired_at, setExpiredAt] =useState ([]);
   const [cout, setCout] = useState();
   const [vehicule, setVehicule] = useState([]);
-  const [SelectVehicule, setSelectVehicule] = useState("");
+  const [selectedVehicule, setSelectedVehicule] = useState([]); 
 
   const [id, setid] = useState();
-  
   const [vehiculeu, setVehiculeu] = useState();
   const [coutu, setCoutu] = useState();
   const [referenceu, setReferenceu] = useState();
@@ -71,7 +70,7 @@ const ControleTechnique = () => {
     ({
       id:item.id,
       vehicle:item.vehicule_info.vehicule,
-      vehicle_id: item.vehicle,
+      vehicule_id: item.vehicle,
       remaining: item.remaining,
       reference: item.reference,
       cost: item.cost,
@@ -91,30 +90,37 @@ const ControleTechnique = () => {
 
   // CREATE
 
-  const createControleTechnique= () => {
+
+  const createAssurance = () => {
     setisLoading(true);
     Api_client.post("controle/assurances/", {
-      vehicle: SelectVehicule,
-      reference: reference,
-      cost: cout,
-      expired_at: expired_at,
+    vehicle: selectedVehicule,
+    reference: reference,
+    cost: cout,
+    expired_at: expired_at,
     })
-      .then((response) => {
-        setisLoading(false);
-        setopenModal(false);
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {
-        setisLoading(false);
-      });
-  };
+    .then((response) => {
+    setisLoading(false);
+    if (response.status === 200) {
+    setopenModal(false);
+    fetchData();
+    console.log(response.data);
+    } else {
+    alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+    }
+    })
+    .catch((error) => {
+    setisLoading(false);
+    alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+    });
+    };
+    
 
   // UPDATE
 
-  const updateControleTechnique= () => {
+  const updateAssurance= () => {
     setisLoading(true);
-    Api_client.put(`controle/assurances/${id}`, {
+    Api_client.put(`controle/assurances/${id}/`, {
       vehicle: vehiculeu,
       reference: referenceu,
       cost: coutu,
@@ -133,7 +139,7 @@ const ControleTechnique = () => {
 
   // DELETE
 
-  const deleteControleTechnique= (id) => {
+  const deleteAssurance= (id) => {
     setisLoading(true);
     Api_client.delete(`controle/assurances/${id}`)
       .then((response) => {
@@ -180,7 +186,6 @@ const ControleTechnique = () => {
     {
       field: "actions",
       headerName: "Actions",
-      // width: "50%",
       align: "right",
       renderCell: (params) => (
         <div>
@@ -188,7 +193,7 @@ const ControleTechnique = () => {
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicle_id);
+              setVehiculeu(params.row.vehicule_id);
               setReferenceu(params.row.reference);
               setExpiredAt(params.row.expired_at);
               setCoutu(params.row.cost);
@@ -198,7 +203,7 @@ const ControleTechnique = () => {
 
           <IconButton
             onClick={() => {
-              deleteControleTechnique(params.row.id);
+              deleteAssurance(params.row.id);
             }}>
             <DeleteIcon />
           </IconButton>
@@ -269,30 +274,51 @@ const ControleTechnique = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
+
+
+              <Box
+              sx={{
+                backgroundColor: '#3e4396',
+                width:'800px',
+                marginLeft:'-33px',
+                height:'60px',
+                marginTop:'-35px',
+                borderRadius:'10px',
+                marginBottom: '30px',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+      <Typography variant="h2" component="div">
+        Creation Assurance
+      </Typography>
+    </Box>
          
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
-              <Grid item xs={6}>
-                <FormControl fullWidth color='secondary' size='small'>
-                  <InputLabel id='vehicle'>Vehicle</InputLabel>
-                  <Select
-                    label='Vehicle'
-                    value={SelectVehicule}
-                    onChange={(e) => {
-                      setSelectVehicule(e.target.value);
-                    }}>
-                    {vehicule.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.make}/{item.license_plate}
-                        </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+            <Grid item xs={6}>
+      <FormControl fullWidth color='secondary' size='small'>
+        <InputLabel id='vehicle'>Vehicule</InputLabel>
+        <Select
+          label='Vehicle'
+          fullWidth
+          value={selectedVehicule}
+          onChange={(e) => setSelectedVehicule(e.target.value)}
+          
+        >
+          {vehicule.map((item) => (
+            <MenuItem key={item.id} value={item.id}>
+              {item.make}/{item.license_plate}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='reference'
@@ -334,16 +360,31 @@ const ControleTechnique = () => {
 
             </Grid>
           </Box>
+<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+  <IconButton
+    onClick={createAssurance}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createControleTechnique}>
-          <CheckIcon />
-        </IconButton>
+  <IconButton
+   onClick={handleCloseDialog}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
 
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+
 
         </Box>
       </Modal>
@@ -355,23 +396,43 @@ const ControleTechnique = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
-          <Typography variant='h3'>Entretien</Typography>
+                
+              <Box
+              sx={{
+                backgroundColor: '#3e4396',
+                width:'800px',
+                marginLeft:'-33px',
+                height:'60px',
+                marginTop:'-35px',
+                borderRadius:'10px',
+                marginBottom: '30px',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+      <Typography variant="h2" component="div">
+        Editer l'assurance
+      </Typography>
+    </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
+            <FormControl fullWidth color='secondary' size="small">
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
+                    fullWidth
+                    value={vehiculeu}
                     onChange={(e) => {
-                      setVehicule(e.target.value);
+                      setVehiculeu(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem value={item.license_plate}>{item.license_plate}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -379,11 +440,13 @@ const ControleTechnique = () => {
               <Grid item xs={6}>
                 <TextField
                   label='reference'
+                  fullWidth
                   value={referenceu}
                   onChange={(e) => {
                     setReferenceu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
 
@@ -404,14 +467,16 @@ const ControleTechnique = () => {
 }}
 />
 </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <TextField
                   label='Cout'
+                  fullWidth
                   value={coutu}
                   onChange={(e) => {
                     setCoutu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
 
@@ -426,18 +491,29 @@ const ControleTechnique = () => {
               alignItems: "center",
               justifyContent: "end",
             }}>
-           
 <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton
-              onClick={updateControleTechnique}>
-              <CheckIcon />
-        </IconButton>
-            <IconButton
-              
-              onClick={() => handleCloseu()}>
-<CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={updateAssurance}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
+
+  <IconButton
+   onClick={() => handleCloseu()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
           </Box>
         </Box>
       </Modal>
@@ -445,4 +521,4 @@ const ControleTechnique = () => {
   );
 };
 
-export default ControleTechnique;
+export default Assurance;

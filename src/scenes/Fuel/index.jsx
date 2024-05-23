@@ -33,15 +33,15 @@ const Carburant = () => {
   const [litre, setLitre] = useState([]);
   const [station, setStation] = useState([]);
   const [cout, setCout] = useState();
-  const [vehicule, setVehicule] = useState([]); 
-  const [selectedVehicule, setSelectedVehicule] = useState(''); 
+  const [vehicule, setVehicule] = useState([]);
+  const [selectedVehicule, setSelectedVehicule] = useState([]); 
 
   const [id, setid] = useState();
-
   const [vehiculeu, setVehiculeu] = useState();
   const [litreu, setLitreu] = useState();
   const [stationu, setStationu] = useState();
   const [coutu, setCoutu] = useState();
+  
   
   const [data, setdata] = useState([]);
 
@@ -79,13 +79,15 @@ const Carburant = () => {
   };
 
   const carburantData = data.map((item) =>({
-      id: item.id,
-      vehicle: item.vehicule_info.vehicule,
+      id:item.id,
+      vehicle:item.vehicule_info.vehicule,
+      vehicule_id: item.vehicle,
       litre: item.litre,
       cout: item.cout,
       station: item.station,
   }));
-console.log(vehicule)
+
+
   // CREATE
 
   const createCarburant= () => {
@@ -111,7 +113,7 @@ console.log(vehicule)
 
   const updateCarburant= () => {
     setisLoading(true);
-    Api_client.put(`course/carburant/${id}`, {
+    Api_client.put(`course/carburant/${id}/`, {
       vehicle: vehiculeu,
       litre: litreu,
       cout: coutu,
@@ -187,10 +189,9 @@ console.log(vehicule)
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicule_info.vehicule);
+              setVehiculeu(params.row.vehicule_id);
               setCoutu(params.row.cout);
               setLitreu(params.row.litre);
-
               setStationu(params.row.station);
              
             }}>
@@ -270,11 +271,29 @@ console.log(vehicule)
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
-         
+                      <Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+        Creation des information sur Carburant
+      </Typography>
+    </Box>
+
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
 
@@ -283,6 +302,7 @@ console.log(vehicule)
         <InputLabel id='vehicle'>Vehicule</InputLabel>
         <Select
           label='Vehicle'
+          fullWidth
           value={selectedVehicule}
           onChange={(e) => setSelectedVehicule(e.target.value)}
           
@@ -331,16 +351,29 @@ console.log(vehicule)
               </Grid>
             </Grid>
           </Box>
+<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+  <IconButton
+    onClick={createCarburant}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createCarburant}>
-          <CheckIcon />
-        </IconButton>
-
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={() => handleCloseDialog()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
 
         </Box>
       </Modal>
@@ -352,25 +385,43 @@ console.log(vehicule)
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
-          <Typography variant='h3'>Carburant</Typography>
+                    <Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+        Editer les information sur Carburant
+      </Typography>
+    </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
 
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary' size='small'>
+            <FormControl fullWidth color='secondary' size="small">
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
-                    value={selectedVehicule}
+                    fullWidth
+                    value={vehiculeu}
                     onChange={(e) => {
-                      setSelectedVehicule(e.target.value);
+                      setVehiculeu(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>{item.id}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -378,31 +429,37 @@ console.log(vehicule)
               <Grid item xs={6}>
                 <TextField
                   label='litre'
+                  fullWidth
                   value={litreu}
                   onChange={(e) => {
                     setLitreu(e.target.value);
                   }}
                   color='secondary'
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='cout'
-                  value={coutu}
-                  onChange={(e) => {
-                    setCoutu(e.target.value);
-                  }}
-                  color='secondary'
+                  size="small"
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Station'
+                  fullWidth
                   value={stationu}
                   onChange={(e) => {
                     setStationu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='cout'
+                  fullWidth
+                  value={coutu}
+                  onChange={(e) => {
+                    setCout(e.target.value);
+                  }}
+                  color='secondary'
+                  size="small"
                 />
               </Grid>
 
@@ -417,18 +474,29 @@ console.log(vehicule)
               alignItems: "center",
               justifyContent: "end",
             }}>
-           
 <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton
-              onClick={updateCarburant}>
-              <CheckIcon />
-        </IconButton>
-            <IconButton
-              
-              onClick={() => handleCloseu()}>
-<CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={updateCarburant}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
+
+  <IconButton
+    onClick={() => handleCloseu()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
           </Box>
         </Box>
       </Modal>

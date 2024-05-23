@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useLocation  } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
@@ -22,12 +22,20 @@ import Insurance from "./scenes/insurance";
 import TechnicalControl from "./scenes/TechnicalControl";
 import Maintenance from "./scenes/Maintenance";
 import Vehicles from "./scenes/vehicles";
-import Login from "./scenes/Login";
+import Login from "./scenes/login";
+import AuthCheck from "./AuthCheck";
 
 function App() {
   const [theme, colorMode] = useMode();
+  const location = useLocation();
   const [isSidebar, setIsSidebar] = useState(true);
+  const isOnLoginPage = location.pathname === "/";
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
+  useEffect(() => {
+    setIsSidebarVisible(!isOnLoginPage);
+  }, [isOnLoginPage]);
+  
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -37,25 +45,26 @@ function App() {
           <main className="content">
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
-            <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/vehicles" element={<Vehicles />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/form" element={<Form />} />
-              <Route path="/bar" element={<Bar />} />
-              <Route path="/pie" element={<Pie />} />
-              <Route path="/line" element={<Line />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/geography" element={<Geography />} />
-              <Route path="/Personal" element={<Personal/>} />
-              <Route path="/Verification" element={<Verification/>} />
-              <Route path="/VehicleDetail" element={<VehicleDetail/>} />
-              <Route path="/Fuel" element={<Fuel/>} />
-              <Route path="/Insurance" element={<Insurance/>} />
-              <Route path="/Technical Control" element={<TechnicalControl/>} />
-              <Route path="/Maintenance" element={<Maintenance/>} />
+              {<Route path="/" element={<Login />} />}
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<AuthCheck><Dashboard /></AuthCheck>} />
+              <Route path="/team" element={<AuthCheck><Team /></AuthCheck>} />
+              <Route path="/vehicles" element={<AuthCheck><Vehicles /></AuthCheck>} />
+              <Route path="/invoices" element={<AuthCheck><Invoices /></AuthCheck>} />
+              <Route path="/form" element={<AuthCheck><Form /></AuthCheck>} />
+              <Route path="/bar" element={<AuthCheck><Bar /></AuthCheck>} />
+              <Route path="/pie" element={<AuthCheck><Pie /></AuthCheck>} />
+              <Route path="/line" element={<AuthCheck><Line /></AuthCheck>} />
+              <Route path="/faq" element={<AuthCheck><FAQ /></AuthCheck>} />
+              <Route path="/calendar" element={<AuthCheck><Calendar /></AuthCheck>} />
+              <Route path="/geography" element={<AuthCheck><Geography /></AuthCheck>} />
+              <Route path="/Personal" element={<AuthCheck><Personal/></AuthCheck>} />
+              <Route path="/Verification" element={<AuthCheck><Verification/></AuthCheck>} />
+              <Route path="/VehicleDetail" element={<AuthCheck><VehicleDetail/></AuthCheck>} />
+              <Route path="/Fuel" element={<AuthCheck><Fuel/></AuthCheck>} />
+              <Route path="/Insurance" element={<AuthCheck><Insurance/></AuthCheck>} />
+              <Route path="/Technical Control" element={<AuthCheck><TechnicalControl/></AuthCheck>} />
+              <Route path="/Maintenance" element={<AuthCheck><Maintenance/></AuthCheck>} />
             </Routes>
           </main>
         </div>

@@ -37,10 +37,9 @@ const Maintenance = () => {
   const [total, setTotal] = useState();
   const [garage, setGarage] = useState();
   const [vehicule, setVehicule] = useState([]);
-  const [selectedVehicule, setSelectedVehicule] = useState()
+  const [selectedVehicule, setSelectedVehicule] = useState([]); 
 
   const [id, setid] = useState();
-
   const [vehiculeu, setVehiculeu] = useState();
   const [operationu, setOperationu] = useState();
   const [main_oeuvreu, setMainOeuvreu] = useState();
@@ -86,8 +85,9 @@ const Maintenance = () => {
   };
 
   const maintenanceData = data.map((item) => ({
-    id: item.id, 
-    vehicle: item.vehicule_info.vehicule,
+    id:item.id,
+    vehicle:item.vehicule_info.vehicule,
+    vehicule_id: item.vehicle,
     garage_name: item.garage_name,
     panne: item.panne,
     operation: item.operation,
@@ -98,29 +98,36 @@ const Maintenance = () => {
   }));
   // CREATE
 
-  const createMaintenance= () => {
-    setisLoading(true);
-    Api_client.post("entretien/entretien/", {
-      vehicle: selectedVehicule,
-      garage_name: garage,
-      panne: panne,
-      operation: operation,
-      main_oeuvre: main_oeuvre,
-      piece_rechange: piece_rechange,
-      cout_piece: cout_piece,
-      total: total,
-    })
-      .then((response) => {
-        setisLoading(false);
-        setopenModal(false);
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {
-        setisLoading(false);
-      });
+  
+const createMaintenance = () => {
+  setisLoading(true);
+  Api_client.post("entretien/entretien/", {
+  vehicle: selectedVehicule,
+  garage_name: garage,
+  panne: panne,
+  operation: operation,
+  main_oeuvre: main_oeuvre,
+  piece_rechange: piece_rechange,
+  cout_piece: cout_piece,
+  total: total,
+  })
+  .then((response) => {
+  setisLoading(false);
+  if (response.status === 200) {
+  // La requête a réussi
+  setopenModal(false);
+  fetchData();
+  console.log(response.data);
+  } else {
+  alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+  }
+  })
+  .catch((error) => {
+  setisLoading(false);
+  alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+  });
   };
-
+  
   // UPDATE
 
   const updateMaintenance= () => {
@@ -132,6 +139,7 @@ const Maintenance = () => {
       main_oeuvre: main_oeuvreu,
       piece_rechange: piece_rechangeu,
       cout_piece: cout_pieceu,
+      garage_name: garageu,
       total: totalu,
     })
       .then((response) => {
@@ -226,13 +234,13 @@ const Maintenance = () => {
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setVehiculeu(params.row.vehicle);
+              setVehiculeu(params.row.vehicule_id);
               setOperationu(params.row.operation);
               setPanneu(params.row.panne);
               setMainOeuvreu(params.row.main_oeuvre);
               setPieceRechangeu(params.row.piece_rechange);
               setCoutPieceu(params.row.cout_piece);
-              setGarageu(params.row.garage);
+              setGarageu(params.row.garage_name);
               setTotalu(params.row.total);
              
             }}>
@@ -312,28 +320,51 @@ const Maintenance = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
+
+<Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+       Creation Maintenance
+      </Typography>
+    </Box>
          
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
+            
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary' size='small'>
-                  <InputLabel id='vehicle'>Vehicle</InputLabel>
-                  <Select
-                    label='Vehicle'
-                    value={selectedVehicule}
-                    onChange={(e) => {
-                    setSelectedVehicule(e.target.value);
-                    }}>
-                    {vehicule.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+      <FormControl fullWidth color='secondary' size='small'>
+        <InputLabel id='vehicle'>Vehicule</InputLabel>
+        <Select
+          label='Vehicle'
+          fullWidth
+          value={selectedVehicule}
+          onChange={(e) => setSelectedVehicule(e.target.value)}
+          
+        >
+          {vehicule.map((item) => (
+            <MenuItem key={item.id} value={item.id}>
+              {item.make}/{item.license_plate}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
 
               <Grid item xs={6}>
                 <TextField
@@ -416,16 +447,29 @@ const Maintenance = () => {
               </Grid>
             </Grid>
           </Box>
+    <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+      <IconButton
+        onClick={createMaintenance}
+         sx={{
+               '&:hover': {
+         backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createMaintenance}>
-          <CheckIcon />
-        </IconButton>
-
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={() => handleCloseDialog()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
 
         </Box>
       </Modal>
@@ -437,24 +481,43 @@ const Maintenance = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
-          <Typography variant='h3'>Entretien</Typography>
+            <Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+       Editer Maintenance
+      </Typography>
+    </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
 
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
+            <FormControl fullWidth color='secondary' size="small">
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
+                    fullWidth
+                    value={vehiculeu}
                     onChange={(e) => {
-                      setVehicule(e.target.value);
+                      setVehiculeu(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem value={item.license_plate}>{item.license_plate}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -462,73 +525,87 @@ const Maintenance = () => {
               <Grid item xs={6}>
                 <TextField
                   label='panne'
+                  fullWidth
                   value={panneu}
                   onChange={(e) => {
                     setPanneu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Operation'
+                  fullWidth
                   value={operationu}
                   onChange={(e) => {
                     setOperationu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Main_oeuvre'
+                  fullWidth
                   value={main_oeuvreu}
                   onChange={(e) => {
                     setMainOeuvreu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Piece_rechange'
+                  fullWidth
                   value={piece_rechangeu}
                   onChange={(e) => {
                     setPieceRechangeu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Cout_piece'
+                  fullWidth
                   value={cout_pieceu}
                   onChange={(e) => {
                     setCoutPieceu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
 
               <Grid item xs={6}>
                 <TextField
-                  label='Garage'
+                  label='garage'
+                  fullWidth
                   value={garageu}
                   onChange={(e) => {
                     setGarageu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
 
               <Grid item xs={6}>
                 <TextField
                   label='Total'
+                  fullWidth
                   value={totalu}
                   onChange={(e) => {
                     setTotalu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
 
@@ -543,18 +620,29 @@ const Maintenance = () => {
               alignItems: "center",
               justifyContent: "end",
             }}>
-           
-<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton
-              onClick={updateMaintenance}>
-              <CheckIcon />
-        </IconButton>
-            <IconButton
-              
-              onClick={() => handleCloseu()}>
-<CloseIcon />
-        </IconButton>
-      </Box>
+ <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+   <IconButton
+     onClick={updateMaintenance}
+     sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
+
+  <IconButton
+    onClick={() => handleCloseu()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
           </Box>
         </Box>
       </Modal>

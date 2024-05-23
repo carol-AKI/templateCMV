@@ -49,16 +49,11 @@ const Vehicles = () => {
   const [id, setId] = useState()
   const [data, SetData] = useState([]);
   const navigate = useNavigate(); 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [eau, setEau] = useState(false);
+  const [lubrifiant, setLubrifiant] = useState(false);
+  const [freins, setFreins] = useState(false);
 
-  const [checkedItems, setCheckedItems] = useState({
-    Eau: false,
-    Lubrifiant: false,
-    Freins: false
-  });
-
-  const handleCheckboxChange = (event) => {
-    setCheckedItems({ ...checkedItems, [event.target.name]: event.target.checked });
-  };
   
   const fetchData = () => {
     setIsLoading(true);
@@ -89,20 +84,19 @@ const Vehicles = () => {
   };
 
 
-  const handleButtonClick = () => {
+  const createVerification = () => {
     setStatusDialogOpen(false);
     Api_client.post('course/verification/', {
       vehicule_id: selectedRowId,
-      Eau: checkedItems.Eau,
-      Lubrifiant: checkedItems.Lubrifiant,
-      Freins: checkedItems.Freins
+      eau: eau,
+      lubrifiant: lubrifiant,
+      frein: freins
     })
       .then(response => {
       })
       .catch(error => {
       });
   };
-
   const handleMenuClick = (event, id) => {
     setAnchorEl(event.currentTarget);
     setSelectedRowId(id);
@@ -186,17 +180,12 @@ const handleActionClick = () => {
   ; 
   setopenModalu(true);
 };
-     //DELETE VEHICLE
-  const deleteVehicule= (id) => {
-    setIsLoading(true);
-    Api_client.delete(`vehicule/vehicule/${id}/`)
-      .then((response) => {
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {});
-  };
-
+const deleteVehicule = (id) => {
+  setIsLoading(true);
+  const updatedData = data.filter((vehicule) => vehicule.id !== id);
+  SetData(updatedData);
+  setIsLoading(false);
+};
 
   const columns = [
    
@@ -287,27 +276,27 @@ const handleActionClick = () => {
           },
         }}
       >
-<Dialog open={statusDialogOpen} onClose={handleDialogClose}>
+<Dialog open={statusDialogOpen} onClose={handleDialogClose} PaperProps={{ style: { backgroundColor: "#1f2a40" } }}>
   <DialogTitle>Vehicle Status</DialogTitle>
   <DialogContent>
-    <FormControl>
-      <FormGroup>
-        <FormControlLabel
-          control={<Checkbox checked={checkedItems.Eau} onChange={handleCheckboxChange} name="Eau" />}
-          label="Eau"
-        />
-        <FormControlLabel
-          control={<Checkbox checked={checkedItems.Lubrifiant} onChange={handleCheckboxChange} name="Lubrifiant" />}
-          label="Lubrifiant"
-        />
-        <FormControlLabel
-          control={<Checkbox checked={checkedItems.Freins} onChange={handleCheckboxChange} name="Freins" />}
-          label="Freins"
-        />
-      </FormGroup>
-    </FormControl>
+  <FormControl>
+        <FormGroup>
+          <FormControlLabel
+            control={<Checkbox value={eau} onChange={(e) => setEau(e.target.checked)} name="Eau" />}
+            label="Eau"
+          />
+          <FormControlLabel
+            control={<Checkbox value={lubrifiant} onChange={(e) => setLubrifiant(e.target.checked)} name="Lubrifiant" />}
+            label="Lubrifiant"
+          />
+          <FormControlLabel
+            control={<Checkbox value={freins} onChange={(e) => setFreins(e.target.checked)} name="Freins" />}
+            label="Freins"
+          />
+        </FormGroup>
+      </FormControl>
     <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-      <Button onClick={() => handleButtonClick(selectedRowId)}>OK</Button>
+      <Button onClick={() => createVerification(selectedRowId)}>OK</Button>
     </div>
   </DialogContent>
 </Dialog>
@@ -319,95 +308,129 @@ const handleActionClick = () => {
           }}
         />
       </Box>
-      <Dialog open={open} onClose={handleCloseDialog} sx={{ "& .MuiDialog-paper": { width: "15cm", height: "10cm" } }}>
-      <DialogTitle>
-    <Box display="flex" justifyContent="center">
-      <Typography variant="h2" component="div" fontWeight="bold">
-        Create New Vehicle
+      <Modal open={open} onClose={handleCloseDialog} >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 700,
+            bgcolor: "#1f2a40",
+            boxShadow: 24,
+            p: 4,
+            borderRadius:'10px'
+          }}>
+         <Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'700px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+      Creation Vehicule
       </Typography>
     </Box>
-  </DialogTitle>
-  <DialogContent>
-    <form style={{ width: "100%", height: "80%" }}>
-      <Grid container spacing={1} style={{ height: "100%", marginTop: "20px" }}>
-       
-        <Grid item xs={6}>
-          <Box height="100%">
-          <Typography 
-          variant="h6" 
-          style={{ marginBottom: "10px" }}>
-                   Make
-                        </Typography>
-            <input 
-            onChange={(e) => setMake(e.target.value)}
-            type="text" 
-            placeholder="Vehicle make" 
-            style={{ width: "90%", height: "40%" }} />
-          </Box>
-        </Grid>
+      
+          <Box margin={2}>
+            <Grid container spacing={2} item xs={12} alignItems='center'>
+          
+            <Grid item xs={6}>
+                <TextField
+                  label='make'
+                  fullWidth
+                  color='secondary'
+                  size='small'
+                  onChange={(e) => {
+                    setMake(e.target.value);
+                  }}
+                />
+              </Grid>
 
-        <Grid item xs={6}>
-          <Box height="100%">
-           <Typography 
-              variant="h6" 
-              style={{ marginBottom: "10px", marginLeft:"10px" }}>
-                     Model
-           </Typography>
-            <input 
-                onChange={(e) => setModel(e.target.value)}
-                type="text" 
-                placeholder="Vehicle model" 
-                style={{ width: "100%", height: "40%", marginLeft:"10px"  }} />
-          </Box>
-        </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label='model'
+                  fullWidth
+                  color='secondary'
+                  size='small'
+                  onChange={(e) => {
+                    setModel(e.target.value);
+                  }}
+                />
+              </Grid>
 
-       <Grid item xs={6}>
-        <Box height="100%">
-          <Typography 
-            variant="h6" 
-            style={{ marginBottom: "10px",}}>
-                  License plate
-          </Typography>
-            <input onChange={(e) => setLicensePlate(e.target.value)}
-            type="text" placeholder="License plate" style={{ width: "90%", height: "40%",}} />
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box height="100%">
-          <Typography variant="h6" style={{ marginBottom: "10px",marginLeft:"8px"  }}>Car chassis number</Typography>
-            <input onChange={(e) => setNumeroChassi(e.target.value)}
-            type="text" placeholder="Car chassis number" style={{ width: "100%", height: "40%",marginLeft:"px" }} />
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-      <FormControl fullWidth color="secondary" size="small">
-        <InputLabel id="typeCarburant">Fuel Type</InputLabel>
-        <Select
+              <Grid item xs={6}>
+                <TextField
+                  label='license_plate'
+                  fullWidth
+                  color='secondary'
+                  size='small'
+                  onChange={(e) => {
+                    setLicensePlate(e.target.value);
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={6}>
+                <TextField
+                  label='numero_chassi'
+                  fullWidth
+                  color='secondary'
+                  size='small'
+                  onChange={(e) => {
+                    setNumeroChassi(e.target.value);
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth color='secondary' size='small'>
+                  <InputLabel id='intitule'>Type du carburant</InputLabel>
+                  <Select
                     label='Intitule'
                     onChange={(e) => {
                       setTypeCarburant(e.target.value);
                     }}>
                     
-                      <MenuItem value="DIESEL">Diesel</MenuItem>
                       <MenuItem value="ESSENCE">Essence</MenuItem>
+                      <MenuItem value="DIESEL">Diesel</MenuItem>
                   
                   </Select>
-      </FormControl>
-    </Grid>
+                </FormControl>
+              </Grid>
       </Grid>
-      <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createVehicule}>
-          <CheckIcon />
-        </IconButton>
+         <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+      <IconButton
+        onClick={createVehicule}
+         sx={{
+               '&:hover': {
+         backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-    </form>
-  </DialogContent>
-</Dialog>
-
+  <IconButton
+    onClick={() => handleCloseDialog()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
+          </Box>
+        </Box>
+      </Modal>
 <Modal open={openModalu} >
         <Box
           sx={{
@@ -415,11 +438,30 @@ const handleActionClick = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 800,
-            bgcolor: "background.paper",
+            width: 700,
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
+
+             <Box
+             sx={{
+               backgroundColor: '#3e4396',
+               width:'700px',
+               marginLeft:'-33px',
+               height:'60px',
+               marginTop:'-35px',
+               borderRadius:'10px',
+               marginBottom: '30px',
+               display: 'flex',
+               justifyContent: 'center',
+             }}
+           >
+      <Typography variant="h2" component="div">
+      Editer Vehicule
+      </Typography>
+    </Box>
       
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
@@ -427,51 +469,61 @@ const handleActionClick = () => {
               <Grid item xs={6}>
                 <TextField
                   label='make'
+                  fullWidth
                   value={makeu}
                   onChange={(e) => {
                     setMakeu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField 
                   label='Model'
+                  fullWidth
                   value={modelu}
                   onChange={(e) => {
                     setModelu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='NumeroChassi'
+                  fullWidth
                   value={numeroChassiu}
                   onChange={(e) => {
                     setNumeroChassiu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='LicensePlate'
+                  fullWidth
                   value={licensePlateu}
                   onChange={(e) => {
                     setLicensePlateu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={12}>
                 <TextField
                   label='TypeCarburant'
+                  fullWidth
                   value={typeCarburantu}
                   onChange={(e) => {
                     setTypeCarburantu(e.target.value);
                   }}
                   color='secondary'
+                  size="small"
                 />
               </Grid>
 
@@ -488,26 +540,55 @@ const handleActionClick = () => {
             }}>
            
            <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={updateVehicule}>
-          <CheckIcon />
-        </IconButton>
+      <IconButton
+        onClick={updateVehicule}
+         sx={{
+               '&:hover': {
+         backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-        <IconButton onClick={handleCloseu}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={() => handleCloseu()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
           </Box>
         </Box>
       </Modal>
 
-    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} onChange={(e)=> {handleActionClick (e)
-         console.log(e.target.value)
-}}>
-        <MenuItem value= "ViewDetails" onClick={handleActionClick} >View Details</MenuItem>
-        <MenuItem onClick={() => handleMenudClick(selectedRowId)}>Vehicle Status</MenuItem>
-        <MenuItem onClick={() => handleUpdateClick(selectedRowId)}>Update</MenuItem>
-        <MenuItem onClick={() => deleteVehicule(selectedRowId)}>Delete</MenuItem>
-    </Menu>
+  <Menu
+             anchorEl={anchorEl}
+             open={Boolean(anchorEl) && !statusDialogOpen || menuOpen}
+             onClose={handleMenuClose}
+             PaperProps={{
+             style: {
+                     backgroundColor: "#1f2a40",
+                    },
+                        }}
+             onChange={(e) => {
+               handleActionClick(e);
+             console.log(e.target.value);
+                       }}
+                                             >
+     <MenuItem value="ViewDetails" onClick={handleActionClick}>
+        View Details
+     </MenuItem>
+     <MenuItem onClick={() => handleMenudClick(selectedRowId)}>
+       Add Status
+     </MenuItem>
+     <MenuItem onClick={() => handleUpdateClick(selectedRowId)}>Update</MenuItem>
+     <MenuItem onClick={() => deleteVehicule(selectedRowId)}>Delete</MenuItem>
+  </Menu>
     </Box>
   );
 };

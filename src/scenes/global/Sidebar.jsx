@@ -1,103 +1,146 @@
-import React, { useState } from 'react';
+import React, { useState, useContext  } from 'react';
 import { ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import { Link } from 'react-router-dom';
 import 'react-pro-sidebar/dist/css/styles.css';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import DriveEtaOutlinedIcon from '@mui/icons-material/DriveEtaOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
+
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import { useNavigate } from 'react-router-dom';
-const Sidebar = () => {
+import { Box, useTheme } from "@mui/material";
+import { ColorModeContext, tokens } from "../../theme";
+
+
+  const Sidebar = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const colorMode = useContext(ColorModeContext);
   const [selectedMenu, setSelectedMenu] = useState(null);
-  const [themeMode, setThemeMode] = useState('light');
-
-
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu);
   };
   const navigate = useNavigate();
-  return (
+  const token = sessionStorage.getItem('token')
 
-    <ProSidebar style={{ backgroundColor: '#f2f2f2' , marginTop: '0px'}}>
-      <img src="/assets/logo2.jpeg" alt="Logo" style={{ height: '69px', width: 'auto' }} />
-      <Menu iconShape="square" active={selectedMenu}>
-        <MenuItem
-          icon={<HomeOutlinedIcon />}
-          onClick={() => handleMenuClick('dashboard')}
-        >
-          Dashboard
-          <Link to="/" />
-        </MenuItem>
-        <MenuItem 
-  icon={<DriveEtaOutlinedIcon />}
-  active={selectedMenu === 'Vehicle'}
-  onClick={() => {
-    handleMenuClick('Vehicle');
-    navigate('/vehicles');
-  }}>Vehicle</MenuItem>
+  if(token){
+    return (
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        p={2}
+        bgcolor={colors.blueAccent[700]}
+      >
+   <img src="/assets/logo.jpeg" alt="Logo" 
+  style={{ 
+          height: '60px', 
+          width: '280px', 
+          position: 'absolute', 
+          top: '3px', 
+          left: '8%', 
+          transform: 'translateX(-50%)'
+}} 
+/>
+      <ProSidebar  bgcolor={colors.blueAccent[700]}   style={{marginTop:'53px'}}>
+  
+        <Menu iconShape="square" active={selectedMenu}>
+          <MenuItem
+            icon={<HomeOutlinedIcon />}
+            onClick={() => handleMenuClick('dashboard')}
+          >
+            Dashboard
+            <Link to="/dashboard" />
+          </MenuItem>
+          <MenuItem 
+    icon={<DriveEtaOutlinedIcon />}
+    active={selectedMenu === 'Vehicle'}
+    onClick={() => {
+      handleMenuClick('Vehicle');
+      navigate('/vehicles');
+    }}>Vehicle</MenuItem>
+  
+          <SubMenu
+            title="Running"
+            icon={<AssignmentOutlinedIcon />}
+            active={selectedMenu === 'Running'}
+            onClick={() => handleMenuClick('Running')}
+          >
+            <MenuItem>
+              Movement
+              <Link to="/form"/>
+            </MenuItem>
+            <MenuItem>
+              Verification
+              <Link to="/verification" />
+            </MenuItem>
+            <MenuItem>
+             Fuel
+              <Link to="/Fuel" />
+            </MenuItem>
+          </SubMenu>
+          <SubMenu
+            title="Control"
+            icon={<TuneOutlinedIcon />}
+            active={selectedMenu === 'Control'}
+            onClick={() => handleMenuClick('control')}
+          >
+            <MenuItem>
+              Insurance
+              <Link to="/Insurance" />
+            </MenuItem>
+            <MenuItem>
+             Technical Control
+              <Link to="/Technical Control"/>
+            </MenuItem>
+          </SubMenu>
+   <MenuItem 
+    icon={<BuildOutlinedIcon />}
+    active={selectedMenu === 'Maintenance'}
+    onClick={() => {
+      handleMenuClick('Maintenance');
+      navigate('/Maintenance');
+    }}>Maintenance</MenuItem>
+          <SubMenu
+            title="Setting"
+            icon={<SettingsOutlinedIcon />}
+            active={selectedMenu === 'Setting'}
+            onClick={() => handleMenuClick('Setting')}
+          >
+            <MenuItem>
+           Personal
+              <Link to="/Personal"/>
+            </MenuItem>
+            <MenuItem>
+             Systeme variable
+              <Link to="/Systeme variable"/>
+            </MenuItem>
+          </SubMenu>
+        </Menu>
+      </ProSidebar>
+      </Box>
+    );
+  } else {
+    return (
+      <Box
+        sx={{
+          "& .pro-sidebar-inner": {
+            background: `${colors.primary[400]} !important`,
+          },
+          "& .pro-icon-wrapper": {
+            backgroundColor: "transparent !important",
+          },
 
-        <SubMenu
-          title="Running"
-          icon={<AssignmentOutlinedIcon />}
-          active={selectedMenu === 'Running'}
-          onClick={() => handleMenuClick('Running')}
-        >
-          <MenuItem>
-            Movement
-            <Link to="/form"/>
-          </MenuItem>
-          <MenuItem>
-            Verification
-            <Link to="/verification" />
-          </MenuItem>
-          <MenuItem>
-           Fuel
-            <Link to="/Fuel" />
-          </MenuItem>
-        </SubMenu>
-        <SubMenu
-          title="Control"
-          icon={<TuneOutlinedIcon />}
-          active={selectedMenu === 'Control'}
-          onClick={() => handleMenuClick('control')}
-        >
-          <MenuItem>
-            Insurance
-            <Link to="/Insurance" />
-          </MenuItem>
-          <MenuItem>
-           Technical Control
-            <Link to="/Technical Control"/>
-          </MenuItem>
-        </SubMenu>
- <MenuItem 
-  icon={<BuildOutlinedIcon />}
-  active={selectedMenu === 'Maintenance'}
-  onClick={() => {
-    handleMenuClick('Maintenance');
-    navigate('/Maintenance');
-  }}>Maintenance</MenuItem>
-        <SubMenu
-          title="Setting"
-          icon={<SettingsOutlinedIcon />}
-          active={selectedMenu === 'Setting'}
-          onClick={() => handleMenuClick('Setting')}
-        >
-          <MenuItem>
-         Personal
-            <Link to="/Personal"/>
-          </MenuItem>
-          <MenuItem>
-           Systeme variable
-            <Link to="/Systeme variable"/>
-          </MenuItem>
-        </SubMenu>
-      </Menu>
-    </ProSidebar>
-  );
+          "& .pro-inner-item:hover": {
+            color: "#868dfb !important",
+          },
+          "& .pro-menu-item.active": {
+            color: "#6870fa !important",
+          },
+        }}></Box>
+    );
+  }
 };
 
 export default Sidebar;

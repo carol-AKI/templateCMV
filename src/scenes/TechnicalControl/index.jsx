@@ -32,16 +32,17 @@ const ControleTechnique = () => {
   const [description, setDescription] = useState([]);
   const [cout, setCout] = useState();
   const [vehicule, setVehicule] = useState([]);
-  const [driver, setDriver] = useState([])
   const [SelectVehicule, setSelectVehicule] = useState("");
-  const [selectDriver, setSelectDriver] = useState()
+  const [SelectConducteur, setSelectConducteur] = useState("");
 
-  const [id, setid] = useState();
+  const [id, setid] = useState([]);
   
-  const [vehiculeu, setVehiculeu] = useState();
-  const [coutu, setCoutu] = useState();
-  const [descriptionu, setDescriptionu] = useState();
-  const [driveru, setDriveru] = useState()
+  const [vehiculeu, setVehiculeu] = useState([]);
+  const [coutu, setCoutu] = useState([]);
+  const [descriptionu, setDescriptionu] = useState([]);
+  const [conducteuru, setConducteuru] = useState();
+  const [personnelle, setPersonnelle] = useState([]);
+
 
   const [data, setdata] = useState([]);
   
@@ -58,16 +59,6 @@ const ControleTechnique = () => {
         setisLoading(false);
       });
   };
-
-  const fetchDriver = () => {
-    setisLoading(true);
-    Api_client.get("parametrage/personnelle/")
-    .then((response) => {
-      setisLoading(false);
-      setDriver(response.data);
-    });
-  }
-  console.log(driver)
   const fetchVehicule = () => {
     setisLoading(true);
     Api_client.get("vehicule/vehicule/").then((response) => {
@@ -80,9 +71,10 @@ const ControleTechnique = () => {
 
     ({
       id:item.id,
-      driver_name: item.driver_info.driver,
+      conducteur:item.conducteur_info.conducteur,
+      conducteur_id: item.conducteur,
       vehicle:item.vehicule_info.vehicule,
-      vehicle_id: item.vehicle,
+      vehicule_id: item.vehicle,
       description: item.description,
       cost: item.cost,
     
@@ -90,10 +82,18 @@ const ControleTechnique = () => {
     
     );
 
+    const fetchPersonnelle = () => {
+      setisLoading(true);
+      Api_client.get("parametrage/personnelle/").then((response) => {
+        setisLoading(false);
+        setPersonnelle(response.data);
+      });
+    };
+
   useEffect(() => {
     fetchData();
     fetchVehicule();
-    fetchDriver();
+    fetchPersonnelle();
   }, []);
 
   const handleCloseDialog = () => {
@@ -105,7 +105,7 @@ const ControleTechnique = () => {
   const createControleTechnique= () => {
     setisLoading(true);
     Api_client.post("controle/controle-techniques/", {
-      driver_name: selectDriver,
+      conducteur: SelectConducteur,
       vehicle: SelectVehicule,
       description: description,
       cost: cout,
@@ -125,8 +125,9 @@ const ControleTechnique = () => {
 
   const updateControleTechnique= () => {
     setisLoading(true);
-    Api_client.put(`controle/controle-techniques/${id}`, {
+    Api_client.put(`controle/controle-techniques/${id}/`, {
       vehicle: vehiculeu,
+      conducteur: conducteuru,
       description: descriptionu,
       cost: coutu,
     })
@@ -159,17 +160,17 @@ const ControleTechnique = () => {
     setopenModalu(false);
   };
   const columns = [
-    { field: "id", headerName: "ID" },
+  
     {
-      field: "driver_name",
-      headerName: "Driver",
+      field: "conducteur",
+      headerName: "Conducteur",
       flex: 1,
       cellClassName: "driver_name-column--cell",
     },
   
     {
       field: "vehicle",
-      headerName: "vehicle",
+      headerName: "vehicule",
       flex: 1,
       cellClassName: "Vehicle-column--cell",
     },
@@ -182,7 +183,7 @@ const ControleTechnique = () => {
     },
     {
       field: "cost",
-      headerName: "cost",
+      headerName: "cout",
       flex: 1,
       cellClassName: "cout-column--cell",
     },
@@ -198,8 +199,8 @@ const ControleTechnique = () => {
             onClick={() => {
               setopenModalu(true);
               setid(params.row.id);
-              setDriveru(params.row.driver);
-              setVehiculeu(params.row.vehicle_id);
+              setConducteuru(params.row.conducteur_id);
+              setVehiculeu(params.row.vehicule_id);
               setDescriptionu(params.row.description);
               setCoutu(params.row.cost);
             }}>
@@ -279,26 +280,43 @@ const ControleTechnique = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
+
+<Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+        Creation Controle Technique
+      </Typography>
+    </Box>
          
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
             <Grid item xs={6}>
                 <FormControl fullWidth color='secondary' size='small'>
-                  <InputLabel id='driver_name'>Driver</InputLabel>
+                  <InputLabel id='conducteur'>Conducteur</InputLabel>
                   <Select
-                    label='Driver'
-                    value={selectDriver}
+                    label='Conducteur'
+                    value={SelectConducteur}
                     onChange={(e) => {
-                      setSelectDriver(e.target.value);
+                      setSelectConducteur(e.target.value);
                     }}>
-                    {driver.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.nom}
-                        </MenuItem>
+                    {personnelle.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>{item.nom}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -308,6 +326,7 @@ const ControleTechnique = () => {
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
+                    fullWidth
                     value={SelectVehicule}
                     onChange={(e) => {
                       setSelectVehicule(e.target.value);
@@ -333,7 +352,7 @@ const ControleTechnique = () => {
               </Grid>
               <Grid item xs={6}>
                 <TextField
-                  label='cout'
+                  label='cost'
                   fullWidth
                   color='secondary'
                   size='small'
@@ -345,16 +364,29 @@ const ControleTechnique = () => {
 
             </Grid>
           </Box>
+ <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+  <IconButton
+    onClick={createControleTechnique}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createControleTechnique}>
-          <CheckIcon />
-        </IconButton>
-
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={handleCloseDialog}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
 
         </Box>
       </Modal>
@@ -366,40 +398,59 @@ const ControleTechnique = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
-          <Typography variant='h3'>Entretien</Typography>
+                     <Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+       Editer Controle Technique
+      </Typography>
+    </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
-                  <InputLabel id='vehicle'>Vehicle</InputLabel>
+                <FormControl fullWidth color='secondary' size='small'>
+                  <InputLabel id='conducteur'>Conducteur</InputLabel>
                   <Select
-                    label='Vehicle'
-                    value={driveru}
+                    label='Conducteur'
+                    fullWidth
+                    value={conducteuru}
                     onChange={(e) => {
-                      setDriveru(e.target.value);
+                      setConducteuru(e.target.value);
                     }}>
-                    {driver.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.name}
-                        </MenuItem>
+                    {personnelle.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>{item.prenom}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
-            <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
+          
+              <Grid item xs={6}>
+                <FormControl fullWidth color='secondary' size='small'>
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
+                    fullWidth
+                    value={vehiculeu}
                     onChange={(e) => {
-                      setVehicule(e.target.value);
+                      setVehiculeu(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem value={item.license_plate}>{item.license_plate}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -407,21 +458,25 @@ const ControleTechnique = () => {
               <Grid item xs={6}>
                 <TextField
                   label='Description'
+                  fullWidth
                   value={descriptionu}
                   onChange={(e) => {
                     setDescriptionu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <TextField
                   label='Cout'
+                  fullWidth
                   value={coutu}
                   onChange={(e) => {
                     setCoutu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
 
@@ -436,18 +491,29 @@ const ControleTechnique = () => {
               alignItems: "center",
               justifyContent: "end",
             }}>
-           
-<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton
-              onClick={updateControleTechnique}>
-              <CheckIcon />
-        </IconButton>
-            <IconButton
-              
-              onClick={() => handleCloseu()}>
-<CloseIcon />
-        </IconButton>
-      </Box>
+  <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+  <IconButton
+    onClick={updateControleTechnique}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
+
+  <IconButton
+    onClick={handleCloseu}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
           </Box>
         </Box>
       </Modal>

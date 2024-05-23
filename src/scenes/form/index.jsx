@@ -59,6 +59,7 @@ const Form = () => {
   const [personnelle, setPersonnelle] = useState([]);
   const [data, setdata] = useState([]);
 
+
   const fetchData = () => {
     setisLoading(true);
     Api_client.get("course/mouvement/")
@@ -84,6 +85,8 @@ const mouvementData = data.map(item =>
   heure_retour:item.heure_retour,
   observation:item.observation,
   kilometrage:item.kilometrage,
+  km_depart:item.km_depart,
+  km_retour:item.km_retour,
   demandeur:item.demandeur_info.demandeur,
   demandeur_id: item.demandeur,
   conducteur:item.conducteur_info.conducteur,
@@ -122,31 +125,36 @@ const mouvementData = data.map(item =>
 
   // CREATE
 
-  const createCourse= () => {
+  const createCourse = () => {
     setisLoading(true);
     Api_client.post("course/mouvement/", {
-      vehicle: SelectVehicule,
-      demandeur: SelectDemandeur,
-      conducteur: SelectConducteur,
-      objet: objet,
-      destination: destination,
-      km_depart: km_depart,
-      km_retour: km_retour,
-      heure_depart: heure_depart,
-      heure_retour: heure_retour,
-      observation: observation,
+    vehicle: SelectVehicule,
+    demandeur: SelectDemandeur,
+    conducteur: SelectConducteur,
+    objet: objet,
+    destination: destination,
+    km_depart: km_depart,
+    km_retour: km_retour,
+    heure_depart: heure_depart,
+    heure_retour: heure_retour,
+    observation: observation,
     })
-      .then((response) => {
-        setisLoading(false);
-        setopenModal(false);
-        fetchData();
-        console.log(response.data);
-      })
-      .catch((error) => {
-        setisLoading(false);
-      });
-  };
-
+    .then((response) => {
+    setisLoading(false);
+    if (response.status === 200) {
+    setopenModal(false);
+    fetchData();
+    console.log(response.data);
+    } else {
+    console.error("Unexpected status code:", response.status);
+    }
+    fetchData();
+    })
+    .catch((error) => {
+    setisLoading(false);
+    console.error("An error occurred:", error);
+    });
+    };
   // UPDATE
 
   const updateCourse= () => {
@@ -168,6 +176,7 @@ const mouvementData = data.map(item =>
         setopenModalu(false);
         fetchData();
         console.log(response.data);
+        
       })
       .catch((error) => {
         setisLoading(false);
@@ -333,9 +342,8 @@ const mouvementData = data.map(item =>
           },
         }}>
         <DataGrid  rows={mouvementData} columns={columns} />
-      </Box>
-
-      <Modal open={openModal} onClose={handleClose}>
+      </Box> 
+      <Modal open={openModal} onClose={handleClose} >
         <Box
           sx={{
             position: "absolute",
@@ -343,11 +351,29 @@ const mouvementData = data.map(item =>
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
             boxShadow: 24,
             p: 4,
+            borderRadius:'10px'
           }}>
-         
+         <Box
+      sx={{
+        backgroundColor: '#3e4396',
+        width:'800px',
+        marginLeft:'-33px',
+        height:'60px',
+        marginTop:'-35px',
+        borderRadius:'10px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <Typography variant="h2" component="div">
+        Creation Mouvement
+      </Typography>
+    </Box>
+
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
             <Grid item xs={6}>
@@ -461,7 +487,7 @@ setHeureDepart(e.target.value);
            shrink: true,
 }}
          inputProps={{
-         step: 300, // 5 minutes
+         step: 300,
 }}
          onChange={(e) => {
          setHeureRetour(e.target.value);
@@ -495,15 +521,29 @@ setHeureDepart(e.target.value);
             </Grid>
           </Box>
 
-          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton onClick={createCourse}>
-          <CheckIcon />
-        </IconButton>
+  <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+  <IconButton
+    onClick={createCourse}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
 
-        <IconButton onClick={handleCloseDialog}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
+  <IconButton
+    onClick={handleCloseDialog}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
 
         </Box>
       </Modal>
@@ -515,34 +555,54 @@ setHeureDepart(e.target.value);
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: 800,
-            bgcolor: "background.paper",
+            bgcolor: "#1f2a40",
+            borderRadius:'10px',
             boxShadow: 24,
             p: 4,
           }}>
-          <Typography variant='h3'>COURSES</Typography>
+             
+              <Box
+              sx={{
+                backgroundColor: '#3e4396',
+                width:'800px',
+                marginLeft:'-33px',
+                height:'60px',
+                marginTop:'-35px',
+                borderRadius:'10px',
+                marginBottom: '30px',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+      <Typography variant="h2" component="div">
+        Editer Mouvement
+      </Typography>
+    </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
 
             <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
+                <FormControl fullWidth color='secondary' size='small'>
                   <InputLabel id='vehicle'>Vehicle</InputLabel>
                   <Select
                     label='Vehicle'
+                    fullWidth
                     value={vehiculeu}
                     onChange={(e) => {
                       setVehiculeu(e.target.value);
                     }}>
                     {vehicule.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>{item.license_plate}</MenuItem>
+                      <MenuItem key={item.id} value={item.id}>{item.make}/{item.license_plate}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
+                <FormControl fullWidth color='secondary' size='small'>
                   <InputLabel id='demandeur'>Demandeur</InputLabel>
                   <Select
                     label='Demandeur'
+                    fullWidth
                     value={demandeuru}
                     onChange={(e) => {
                       setDemandeuru(e.target.value);
@@ -555,10 +615,11 @@ setHeureDepart(e.target.value);
               </Grid>
 
               <Grid item xs={6}>
-                <FormControl fullWidth color='secondary'>
+                <FormControl fullWidth color='secondary' size='small'>
                   <InputLabel id='conducteur'>Conducteur</InputLabel>
                   <Select
                     label='Conducteur'
+                    fullWidth
                     value={conducteuru}
                     onChange={(e) => {
                       setConducteuru(e.target.value);
@@ -573,73 +634,86 @@ setHeureDepart(e.target.value);
               <Grid item xs={6}>
                 <TextField
                   label='objet'
+                  fullWidth
                   value={objetu}
                   onChange={(e) => {
                     setObjetu(e.target.value);
                   }}
                   color='secondary'
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label='Destination'
-                  value={destinationu}
-                  onChange={(e) => {
-                    setDestinationu(e.target.value);
-                  }}
-                  color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Heure_depart'
+                  fullWidth
                   value={heure_departu}
                   onChange={(e) => {
                     setHeureDepartu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Heure_retour'
+                  fullWidth
                   value={heure_retouru}
                   onChange={(e) => {
                     setHeureRetouru(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Km_depart'
+                  fullWidth
                   value={km_departu}
                   onChange={(e) => {
                     setKmDepartu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
 
               <Grid item xs={6}>
                 <TextField
                   label='Km_retour'
+                  fullWidth
                   value={km_retouru}
                   onChange={(e) => {
                     setKmRetouru(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
-
+              <Grid item xs={6}>
+                <TextField
+                  label='Destination'
+                  fullWidth
+                  value={destinationu}
+                  onChange={(e) => {
+                    setDestinationu(e.target.value);
+                  }}
+                  color='secondary'
+                  size='small'
+                />
+              </Grid>
               <Grid item xs={6}>
                 <TextField
                   label='Observation'
+                  fullWidth
                   value={observationu}
                   onChange={(e) => {
                     setObservationu(e.target.value);
                   }}
                   color='secondary'
+                  size='small'
                 />
               </Grid>
 
@@ -654,18 +728,29 @@ setHeureDepart(e.target.value);
               alignItems: "center",
               justifyContent: "end",
             }}>
-           
-<Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-        <IconButton
-              onClick={updateCourse}>
-              <CheckIcon />
-        </IconButton>
-            <IconButton
-              
-              onClick={() => handleCloseu()}>
-<CloseIcon />
-        </IconButton>
-      </Box>
+  <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
+  <IconButton
+    onClick={updateCourse}
+    sx={{
+      '&:hover': {
+        backgroundColor: '#4cceac',
+      },
+    }}
+  >
+    <CheckIcon />
+  </IconButton>
+
+  <IconButton
+    onClick={() => handleCloseu()}
+    sx={{
+      '&:hover': {
+        backgroundColor: 'red',
+      },
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
           </Box>
         </Box>
       </Modal>
