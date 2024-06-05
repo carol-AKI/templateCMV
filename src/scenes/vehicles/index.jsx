@@ -25,6 +25,7 @@ import { Grid } from "@mui/material";
 import { Api_client } from "../../data/Api";
 
 const Vehicles = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModalu, setopenModalu] = useState(false);
@@ -87,7 +88,7 @@ const Vehicles = () => {
   const createVerification = () => {
     setStatusDialogOpen(false);
     Api_client.post('course/verification/', {
-      vehicule_id: selectedRowId,
+      vehicle: selectedRowId,
       eau: eau,
       lubrifiant: lubrifiant,
       frein: freins
@@ -180,8 +181,18 @@ const handleActionClick = () => {
   ; 
   setopenModalu(true);
 };
+
+
+// DELETE
+
 const deleteVehicule = (id) => {
   setIsLoading(true);
+  Api_client.delete(`vehicule/vehicule/${id}`)
+    .then((response) => {
+      fetchData();
+      console.log(response.data);
+    })
+    .catch((error) => {});
   const updatedData = data.filter((vehicule) => vehicule.id !== id);
   SetData(updatedData);
   setIsLoading(false);
@@ -234,6 +245,7 @@ const deleteVehicule = (id) => {
     <Box m="20px">
       <Header title="VEHICLES" subtitle="Vehicle list" />
       <Box display="flex" justifyContent="flex-end" mt="20px">
+      {group_name !== 'superuser' && (
         <Button
           type="submit"
           color="secondary"
@@ -242,7 +254,7 @@ const deleteVehicule = (id) => {
           onClick={handleOpenDialog}
         >
           Create
-        </Button>
+        </Button>)}
       </Box>
       <Box
         m="40px 0 0 0"
@@ -394,6 +406,7 @@ const deleteVehicule = (id) => {
                   <InputLabel id='intitule'>Type du carburant</InputLabel>
                   <Select
                     label='Intitule'
+                    size='small'
                     onChange={(e) => {
                       setTypeCarburant(e.target.value);
                     }}>
@@ -405,6 +418,7 @@ const deleteVehicule = (id) => {
                 </FormControl>
               </Grid>
       </Grid>
+
          <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
       <IconButton
         onClick={createVehicule}
@@ -515,18 +529,25 @@ const deleteVehicule = (id) => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  label='TypeCarburant'
+                <FormControl 
                   fullWidth
-                  value={typeCarburantu}
-                  onChange={(e) => {
-                    setTypeCarburantu(e.target.value);
-                  }}
                   color='secondary'
-                  size="small"
-                />
+                  size='small'>
+                  <InputLabel id='intitule'>Type du carburant</InputLabel>
+                  <Select
+                    label='Intitule'
+                    value={typeCarburantu}
+                    size='small'
+                    onChange={(e) => {
+                      setTypeCarburantu(e.target.value);
+                    }}>
+                    
+                      <MenuItem value="ESSENCE">Essence</MenuItem>
+                      <MenuItem value="DIESEL">Diesel</MenuItem>
+                  
+                  </Select>
+                </FormControl>
               </Grid>
-
             </Grid>
           </Box>
 

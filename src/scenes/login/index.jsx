@@ -34,6 +34,7 @@ const Login = () => {
       })
       .then((res) => {
         sessionStorage.setItem("token", res.data.token);
+         sessionStorage.setItem("group_name", res.data.group_name);
         navigate("/dashboard");
       });
   };

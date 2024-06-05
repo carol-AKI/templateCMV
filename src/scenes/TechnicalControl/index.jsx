@@ -23,6 +23,7 @@ import { Api_client } from "../../data/Api";
 import CheckIcon from "@mui/icons-material/Check";
 
 const ControleTechnique = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -42,6 +43,9 @@ const ControleTechnique = () => {
   const [descriptionu, setDescriptionu] = useState([]);
   const [conducteuru, setConducteuru] = useState();
   const [personnelle, setPersonnelle] = useState([]);
+  const [showButton, setShowButton] = useState(true);
+  const [showCheckIcon, setShowCheckIcon] = useState(true);
+  const [validationDate, setValidationDate] = useState(null);
 
 
   const [data, setdata] = useState([]);
@@ -142,6 +146,30 @@ const ControleTechnique = () => {
       });
   };
 
+
+  // VALIDATE
+
+  const validateControleTechnique= () => {
+    setisLoading(true);
+    Api_client.put(`controle/controle-techniques/${id}/`, {
+      vehicle: vehiculeu,
+      conducteur: conducteuru,
+      description: descriptionu,
+      cost: coutu,
+    })
+      .then((response) => {
+        setisLoading(false);
+        setShowCheckIcon(false);
+        setValidationDate(new Date().toLocaleDateString());
+        setShowButton(false); 
+        fetchData();
+        console.log(response.data);
+      })
+      .catch((error) => {
+        setisLoading(false);
+      });
+  };
+
   // DELETE
 
   const deleteControleTechnique= (id) => {
@@ -187,37 +215,52 @@ const ControleTechnique = () => {
       flex: 1,
       cellClassName: "cout-column--cell",
     },
+    
+
 
     {
       field: "actions",
       headerName: "Actions",
-      // width: "50%",
       align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              setopenModalu(true);
-              setid(params.row.id);
-              setConducteuru(params.row.conducteur_id);
-              setVehiculeu(params.row.vehicule_id);
-              setDescriptionu(params.row.description);
-              setCoutu(params.row.cost);
-            }}>
-            <EditIcon />
-          </IconButton>
-
-          <IconButton
-            onClick={() => {
-              deleteControleTechnique(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
-
+      renderCell: (params) => {
+      if (group_name !== 'superuser') {
+      return (
+      <div>
+      <IconButton
+      onClick={() => {
+        setopenModalu(true);
+        setid(params.row.id);
+        setConducteuru(params.row.conducteur_id);
+        setVehiculeu(params.row.vehicule_id);
+        setDescriptionu(params.row.description);
+        setCoutu(params.row.cost);
+      }}>
+      <EditIcon />
+      </IconButton>
+      
+      <IconButton
+      onClick={() => {
+      deleteControleTechnique(params.row.id);
+      }}>
+      <DeleteIcon />
+      </IconButton>
+      </div>
+      );
+      } else {
+        return(
+          <Button
+          type="submit"
+          color="secondary"
+          variant="contained"
+          style={{ marginRight: "10px", height:"25px" }}
+          onClick={''}
+        >
+          Restore
+        </Button>);
+      }
+      },
+      },
+      ];
   return (
     <Box m='20px'>
       <Box
@@ -231,6 +274,8 @@ const ControleTechnique = () => {
           borderRadius: 5,
         }}>
         <Header title='CONTROLE TECHNIQUE' subtitle='liste des controle technique' />
+
+        {group_name !== 'superuser' && (
         <Button
          type="submit"
          color="secondary"
@@ -239,7 +284,7 @@ const ControleTechnique = () => {
 
           onClick={() => setopenModal(true)}>
           Ajouter
-        </Button>
+        </Button>)}
       </Box>
       <Box
         m='40px 0 0 0'
@@ -419,6 +464,22 @@ const ControleTechnique = () => {
       <Typography variant="h2" component="div">
        Editer Controle Technique
       </Typography>
+      <div>
+    {showButton && (
+      <Button
+        onClick={validateControleTechnique}
+        sx={{
+          marginLeft: "150px",
+          marginRight: "-150px",
+          height: "30px",
+          marginTop: "15px",
+          backgroundColor: '#4cceac',
+        }}
+      >
+        valider
+      </Button>
+    )}
+  </div>
     </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>

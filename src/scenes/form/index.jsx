@@ -16,15 +16,14 @@ import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useState, useEffect } from "react";
-import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
 import CheckIcon from "@mui/icons-material/Check";
-import moment from 'moment';
 
 const Form = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -56,9 +55,11 @@ const Form = () => {
   const [observationu, setObservationu] = useState();
   const [heure_departu, setHeureDepartu] = useState();
   const [heure_retouru, setHeureRetouru] = useState();
+  const [validate, setValidate] = useState();
   const [personnelle, setPersonnelle] = useState([]);
   const [data, setdata] = useState([]);
-
+  const [showButton, setShowButton] = useState(true);
+  const [showCheckIcon, setShowCheckIcon] = useState(true);
 
   const fetchData = () => {
     setisLoading(true);
@@ -74,28 +75,52 @@ const Form = () => {
       });
   };
 
-const mouvementData = data.map(item =>
+  
 
-({
-  id:item.id,
-  vehicle:item.vehicule_info.vehicule,
-  vehicule_id: item.vehicle,
-  objet:item.objet,
-  heure_depart:item.heure_depart,
-  heure_retour:item.heure_retour,
-  observation:item.observation,
-  kilometrage:item.kilometrage,
-  km_depart:item.km_depart,
-  km_retour:item.km_retour,
-  demandeur:item.demandeur_info.demandeur,
-  demandeur_id: item.demandeur,
-  conducteur:item.conducteur_info.conducteur,
-  conducteur_id: item.conducteur,
-  destination:item.destination,
+  let mouvementData;
 
-} ) 
-
-);
+  if (group_name === "superuser") {
+    mouvementData = data.map(item => ({
+      id: item.id,
+      vehicle: item.vehicule_info.vehicule,
+      vehicule_id: item.vehicle,
+      objet: item.objet,
+      heure_depart: item.heure_depart,
+      heure_retour: item.heure_retour,
+      observation: item.observation,
+      kilometrage: item.kilometrage,
+      km_depart: item.km_depart,
+      km_retour: item.km_retour,
+      demandeur: item.demandeur_info.demandeur,
+      demandeur_id: item.demandeur,
+      conducteur: item.conducteur_info.conducteur,
+      conducteur_id: item.conducteur,
+      destination: item.destination,
+      date_delete: item.date_delete,
+      date_validate: item.date_validate
+    }));
+  } else {
+    mouvementData = data.filter(item => item.date_delete === null).map(item => ({
+      id: item.id,
+      vehicle: item.vehicule_info.vehicule,
+      vehicule_id: item.vehicle,
+      objet: item.objet,
+      heure_depart: item.heure_depart,
+      heure_retour: item.heure_retour,
+      observation: item.observation,
+      kilometrage: item.kilometrage,
+      km_depart: item.km_depart,
+      km_retour: item.km_retour,
+      demandeur: item.demandeur_info.demandeur,
+      demandeur_id: item.demandeur,
+      conducteur: item.conducteur_info.conducteur,
+      conducteur_id: item.conducteur,
+      destination: item.destination,
+      date_delete: item.date_delete,
+      date_validate: item.date_validate
+    }));
+  }
+  
   
   const fetchVehicule = () => {
     setisLoading(true);
@@ -159,7 +184,7 @@ const mouvementData = data.map(item =>
 
   const updateCourse= () => {
     setisLoading(true);
-    Api_client.put(`course/mouvement/${id}`, {
+    Api_client.put(`course/put/${id}`, {
       vehicle: vehiculeu,
       demandeur: demandeuru,
       conducteur: conducteuru,
@@ -176,24 +201,82 @@ const mouvementData = data.map(item =>
         setopenModalu(false);
         fetchData();
         console.log(response.data);
-        
+        setShowButton(false);
       })
       .catch((error) => {
         setisLoading(false);
       });
   };
 
-  // DELETE
 
-  const deleteCourse= (id) => {
+  // validate
+
+  const validateCourse= () => {
     setisLoading(true);
-    Api_client.delete(`course/mouvement/${id}`)
+    Api_client.put(`course/mouvement/${id}`, {
+      vehicle: vehiculeu,
+      demandeur: demandeuru,
+      conducteur: conducteuru,
+      objet: objetu,
+      destination: destinationu,
+      km_depart: km_departu,
+      km_retour: km_retouru,
+      heure_depart: heure_departu,
+      heure_retour: heure_retouru,
+      observation: observationu,
+    })
       .then((response) => {
+        setisLoading(false);
+        setShowCheckIcon(false);
+        setShowButton(false); 
         fetchData();
         console.log(response.data);
+        setShowButton(false);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        setisLoading(false);
+      });
   };
+
+
+    // restorer
+
+    const restoreDeletedData = (id) => {
+      setisLoading(true);
+      Api_client.patch(`course/mouvement/${id}`, {
+      date_delete: null 
+      })
+      .then((response) => {
+      fetchData();
+      console.log("Données restaurées avec succès :", response.data);
+      })
+      .catch((error) => {
+      console.error("Erreur lors de la restauration des données :", error);
+      })
+      .finally(() => {
+      setisLoading(false);
+      });
+      };
+  
+  // DELETE
+
+  const deleteCourse = (id) => {
+    setisLoading(true);
+    Api_client.patch(`course/mouvement/${id}`, {
+    date_delete: new Date() 
+    })
+    .then((response) => {
+    fetchData(); 
+    console.log(response.data);
+    })
+    .catch((error) => {
+    console.error("Erreur lors de la suppression du mouvement:", error);
+    })
+    .finally(() => {
+    setisLoading(false);
+    });
+    };
+    
 
   const handleClose = () => {
     setopenModal(false);
@@ -201,6 +284,8 @@ const mouvementData = data.map(item =>
   const handleCloseu = () => {
     setopenModalu(false);
   };
+
+  
   const columns = [
     { field: "id", headerName: "ID" },
 
@@ -253,43 +338,62 @@ const mouvementData = data.map(item =>
       cellClassName: "heure_retour-column--cell",
     },
 
+
+
+
+
     {
       field: "actions",
       headerName: "Actions",
-      // width: "50%",
       align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              setopenModalu(true);
-              setid(params.row.id);
-              setVehiculeu(params.row.vehicule_id);
-              setDemandeuru(params.row.demandeur_id);
-              setConducteuru(params.row.conducteur_id);
-              setDestinationu(params.row.destination);
-              setObjetu(params.row.objet);
-              setHeureDepartu(params.row.heure_depart);
-              setHeureRetouru(params.row.heure_retour);
-              setKmDepartu(params.row.km_depart);
-              setKmRetouru(params.row.km_retour);
-              setObservationu(params.row.observation);
-             
-            }}>
-            <EditIcon />
-          </IconButton>
+      renderCell: (params) => {
+        setValidate(params.row.validate)
+      if (group_name !== 'superuser') {
+      return (
+      <div>
+      <IconButton
+      onClick={() => {
+        setopenModalu(true);
+        setid(params.row.id);
+        setVehiculeu(params.row.vehicule_id);
+        setDemandeuru(params.row.demandeur_id);
+        setConducteuru(params.row.conducteur_id);
+        setDestinationu(params.row.destination);
+        setObjetu(params.row.objet);
+        setHeureDepartu(params.row.heure_depart);
+        setHeureRetouru(params.row.heure_retour);
+        setKmDepartu(params.row.km_depart);
+        setKmRetouru(params.row.km_retour);
+        setObservationu(params.row.observation)
+      }}>
+      <EditIcon />
+      </IconButton>
+      
+      <IconButton
+      onClick={() => {
+      deleteCourse(params.row.id);
+      }}>
+      <DeleteIcon />
+      </IconButton>
+      </div>
+      );
+      } else {
+        return(
+        <Button
+        type="submit"
+        color="secondary"
+        variant="contained"
+        style={{ marginRight: "10px",height:"25px" }}
+        onClick={restoreDeletedData}
+      >
+        Restore
+      </Button>)
+      }
+      },
+      },
+      ];
 
-          <IconButton
-            onClick={() => {
-              deleteCourse(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
-
+      
   return (
     <Box m='20px'>
       <Box
@@ -303,6 +407,8 @@ const mouvementData = data.map(item =>
           borderRadius: 5,
         }}>
         <Header title='MOUVEMENT' subtitle='liste des courses' />
+        
+        {group_name !== 'superuser' && (
         <Button
          type="submit"
          color="secondary"
@@ -311,7 +417,7 @@ const mouvementData = data.map(item =>
 
           onClick={() => setopenModal(true)}>
           Ajouter
-        </Button>
+        </Button>)}
       </Box>
       <Box
         m='40px 0 0 0'
@@ -343,6 +449,7 @@ const mouvementData = data.map(item =>
         }}>
         <DataGrid  rows={mouvementData} columns={columns} />
       </Box> 
+
       <Modal open={openModal} onClose={handleClose} >
         <Box
           sx={{
@@ -460,23 +567,23 @@ const mouvementData = data.map(item =>
               </Grid>
               <Grid item xs={6}>
           <TextField
-          label="Heure de départ"
-type="time"
-fullWidth
-color="secondary"
-size="small"
-InputLabelProps={{
-shrink: true,
-}}
-inputProps={{
-step: 300, // 5 minutes
-}}
-onChange={(e) => {
-setHeureDepart(e.target.value);
-         }}
-/>
-</Grid>
-          <Grid item xs={6}>
+               label="Heure de départ"
+     type="time"
+     fullWidth
+     color="secondary"
+     size="small"
+     InputLabelProps={{
+     shrink: true,
+     }}
+     inputProps={{
+     step: 300, // 5 minutes
+     }}
+     onChange={(e) => {
+     setHeureDepart(e.target.value);
+              }}
+     />
+     </Grid>
+               <Grid item xs={6}>
           <TextField
            label="Heure de retour"
            type="time"
@@ -729,19 +836,55 @@ setHeureDepart(e.target.value);
               justifyContent: "end",
             }}>
   <Box display="flex" justifyContent="flex-end" mt={1} style={{ width: "100%", marginBottom: "20px" }}>
-  <IconButton
-    onClick={updateCourse}
-    sx={{
-      '&:hover': {
+          <div>
+        {mouvementData.some(row => row.date_validate === null) && (
+        <>
+        <Button
+        onClick={validateCourse}
+        sx={{
+        marginRight:"-95px",
+        height: "30px",
+        marginTop: "-750px",
         backgroundColor: '#4cceac',
-      },
-    }}
-  >
-    <CheckIcon />
-  </IconButton>
-
-  <IconButton
-    onClick={() => handleCloseu()}
+        }}
+        >
+        valider
+        </Button>
+        
+        <IconButton
+        onClick={updateCourse}
+        sx={{
+        '&:hover': {
+        backgroundColor: '#4cceac',
+        },
+        }}
+        >
+        <CheckIcon />
+        </IconButton>
+        </>
+        )}
+        
+        {mouvementData.filter(row => row.date_validate !== null).map((row, index) => (
+        <div
+        key={index}
+        style={{
+        marginRight: '20px',
+        borderRadius: '5px',
+        marginTop: '5px',
+        backgroundColor: '#4cceac',
+        fontSize: '19px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '320px',
+        }}
+        >
+        Valide le {row.date_validate}
+        </div>
+        ))}
+        </div>
+          <IconButton
+            onClick={() => handleCloseu()}
     sx={{
       '&:hover': {
         backgroundColor: 'red',

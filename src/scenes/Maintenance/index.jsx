@@ -23,6 +23,7 @@ import { Api_client } from "../../data/Api";
 import CheckIcon from "@mui/icons-material/Check";
 
 const Maintenance = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -112,22 +113,20 @@ const createMaintenance = () => {
   total: total,
   })
   .then((response) => {
-  setisLoading(false);
-  if (response.status === 200) {
-  // La requête a réussi
-  setopenModal(false);
-  fetchData();
-  console.log(response.data);
-  } else {
-  alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
-  }
-  })
-  .catch((error) => {
-  setisLoading(false);
-  alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
-  });
-  };
-  
+    setisLoading(false);
+    if (response.status === 200) {
+    console.log(response.data);
+    } else {
+    console.error("Unexpected status code:", response.status);
+    }
+    fetchData();
+    })
+    .catch((error) => {
+    setisLoading(false);
+    alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+    });
+    };
+    
   // UPDATE
 
   const updateMaintenance= () => {
@@ -222,41 +221,53 @@ const createMaintenance = () => {
       flex: 1,
       cellClassName: "total-column--cell",
     },
-
     {
       field: "actions",
       headerName: "Actions",
-      // width: "50%",
       align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              setopenModalu(true);
-              setid(params.row.id);
-              setVehiculeu(params.row.vehicule_id);
-              setOperationu(params.row.operation);
-              setPanneu(params.row.panne);
-              setMainOeuvreu(params.row.main_oeuvre);
-              setPieceRechangeu(params.row.piece_rechange);
-              setCoutPieceu(params.row.cout_piece);
-              setGarageu(params.row.garage_name);
-              setTotalu(params.row.total);
-             
-            }}>
-            <EditIcon />
-          </IconButton>
-
-          <IconButton
-            onClick={() => {
-              deleteMaintenance(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
+      renderCell: (params) => {
+      if (group_name !== 'superuser') {
+      return (
+      <div>
+      <IconButton
+      onClick={() => {
+        setopenModalu(true);
+        setid(params.row.id);
+        setVehiculeu(params.row.vehicule_id);
+        setOperationu(params.row.operation);
+        setPanneu(params.row.panne);
+        setMainOeuvreu(params.row.main_oeuvre);
+        setPieceRechangeu(params.row.piece_rechange);
+        setCoutPieceu(params.row.cout_piece);
+        setGarageu(params.row.garage_name);
+        setTotalu(params.row.total);
+      }}>
+      <EditIcon />
+      </IconButton>
+      
+      <IconButton
+      onClick={() => {
+      deleteMaintenance(params.row.id);
+      }}>
+      <DeleteIcon />
+      </IconButton>
+      </div>
+      );
+      } else {
+        return(
+          <Button
+          type="submit"
+          color="secondary"
+          variant="contained"
+          style={{ marginRight: "10px", height:"25px" }}
+          onClick={''}
+        >
+          Restore
+        </Button>);
+      }
+      },
+      },
+      ];
 
   return (
     <Box m='20px'>
@@ -271,6 +282,7 @@ const createMaintenance = () => {
           borderRadius: 5,
         }}>
         <Header title='ENTRETIEN' subtitle='liste des Operation' />
+        {group_name !== 'superuser' && (
         <Button
          type="submit"
          color="secondary"
@@ -279,7 +291,7 @@ const createMaintenance = () => {
 
           onClick={() => setopenModal(true)}>
           Ajouter
-        </Button>
+        </Button>)}
       </Box>
       <Box
         m='40px 0 0 0'

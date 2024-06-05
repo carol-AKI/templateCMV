@@ -25,6 +25,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const Personal = () => {
+const group_name = sessionStorage.getItem("group_name");
 const theme = useTheme();
 const colors = tokens(theme.palette.mode);
 const [open, setOpen] = useState(false);
@@ -184,16 +185,18 @@ const columns = [
     headerName: "Intitule",
     flex: 1,
 },
+
 {
   field: "actions",
   headerName: "Actions",
-  // width: "50%",
   align: "right",
-  renderCell: (params) => (
-    <div>
-      <IconButton
-        onClick={() => {
-          setopenModalu(true);
+  renderCell: (params) => {
+  if (group_name !== 'superuser') {
+  return (
+  <div>
+  <IconButton
+  onClick={() => {
+    setopenModalu(true);
           setId(params.row.id);
           setNomu(params.row.nom);
           setPrenomu(params.row.prenom);
@@ -201,26 +204,38 @@ const columns = [
           setAdresseu(params.row.adresse);
           setEmailu(params.row.email);
           setIntituleu(params.row.intitule);
-         
-        }}>
-        <EditIcon />
-      </IconButton>
-
-      <IconButton
-        onClick={() => {
-          deletePersonnelle(params.row.id);
-        }}>
-        <DeleteIcon />
-      </IconButton>
-    </div>
-  ),
-},
- ];
-
+  }}>
+  <EditIcon />
+  </IconButton>
+  
+  <IconButton
+  onClick={() => {
+  deletePersonnelle(params.row.id);
+  }}>
+  <DeleteIcon />
+  </IconButton>
+  </div>
+  );
+  } else {
+    return(
+      <Button
+      type="submit"
+      color="secondary"
+      variant="contained"
+      style={{ marginRight: "10px", height: "25px" }}
+      onClick={''}
+    >
+      Restore
+    </Button>);
+  }
+  },
+  },
+  ];
 return (
         <Box m="20px">
         <Header title="PERSONAL" subtitle="Personal list" />
         <Box display="flex" justifyContent="flex-end" mt="10px">
+        {group_name !== 'superuser' && (
 <Button
       type="submit"
       color="secondary"
@@ -229,7 +244,7 @@ return (
       onClick={handleOpenDialog}
 >
                 Create
-</Button>
+</Button>)}
          </Box>
          <Box
              m="40px 0 0 0"

@@ -23,6 +23,7 @@ import { Api_client } from "../../data/Api";
 import CheckIcon from "@mui/icons-material/Check";
 
 const Assurance = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -41,6 +42,11 @@ const Assurance = () => {
   const [referenceu, setReferenceu] = useState();
   const [expired_atu, setExpiredAtu] =useState ([]);
   const [data, setdata] = useState([]);
+  const [showButton, setShowButton] = useState(true);
+  const [showCheckIcon, setShowCheckIcon] = useState(true);
+  const [validationDate, setValidationDate] = useState(null);
+
+
   
 
   const fetchData = () => {
@@ -102,12 +108,11 @@ const Assurance = () => {
     .then((response) => {
     setisLoading(false);
     if (response.status === 200) {
-    setopenModal(false);
-    fetchData();
     console.log(response.data);
     } else {
-    alert("L'erreur est survenue, Veuillez vérifier vos champs que ce sont correctement complétés");
+    console.error("Unexpected status code:", response.status);
     }
+    fetchData();
     })
     .catch((error) => {
     setisLoading(false);
@@ -131,6 +136,30 @@ const Assurance = () => {
         setopenModalu(false);
         fetchData();
         console.log(response.data);
+      })
+      .catch((error) => {
+        setisLoading(false);
+      });
+  };
+
+ //VALIDATE
+
+  const validateAssurance= () => {
+    setisLoading(true);
+    Api_client.put(`controle/assurances/${id}/`, {
+      vehicle: vehiculeu,
+      reference: referenceu,
+      cost: coutu,
+      expired_at: expired_atu,
+    })
+      .then((response) => {
+        setisLoading(false);
+        setShowCheckIcon(false);
+        setValidationDate(new Date().toLocaleDateString());
+        setShowButton(false); 
+        fetchData();
+        console.log(response.data);
+        setShowButton(false); 
       })
       .catch((error) => {
         setisLoading(false);
@@ -182,35 +211,50 @@ const Assurance = () => {
       flex: 1,
       cellClassName: "cout-column--cell",
     },
-
     {
       field: "actions",
       headerName: "Actions",
       align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              setopenModalu(true);
-              setid(params.row.id);
-              setVehiculeu(params.row.vehicule_id);
-              setReferenceu(params.row.reference);
-              setExpiredAt(params.row.expired_at);
-              setCoutu(params.row.cost);
-            }}>
-            <EditIcon />
-          </IconButton>
-
-          <IconButton
-            onClick={() => {
-              deleteAssurance(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
+      renderCell: (params) => {
+      if (group_name !== 'superuser') {
+      return (
+      <div>
+      <IconButton
+      onClick={() => {
+      setopenModalu(true);
+      setid(params.row.id);
+      setVehiculeu(params.row.vehicule_id);
+      setReferenceu(params.row.reference);
+      setExpiredAt(params.row.expired_at);
+      setCoutu(params.row.cost);
+      }}>
+      <EditIcon />
+      </IconButton>
+      
+      <IconButton
+      onClick={() => {
+      deleteAssurance(params.row.id);
+      }}>
+      <DeleteIcon />
+      </IconButton>
+      </div>
+      );
+      } else {
+        return(
+          <Button
+          type="submit"
+          color="secondary"
+          variant="contained"
+          style={{ marginRight: "10px", height:"25px" }}
+          onClick={''}
+        >
+          Restore
+        </Button>);
+      }
+      },
+      },
+      ];
+      
 
   return (
     <Box m='20px'>
@@ -225,6 +269,7 @@ const Assurance = () => {
           borderRadius: 5,
         }}>
         <Header title='ASSURANCE' subtitle='liste des assurances faits' />
+        {group_name !== 'superuser' && (
         <Button
          type="submit"
          color="secondary"
@@ -234,6 +279,7 @@ const Assurance = () => {
           onClick={() => setopenModal(true)}>
           Ajouter
         </Button>
+        )}
       </Box>
       <Box
         m='40px 0 0 0'
@@ -418,6 +464,22 @@ const Assurance = () => {
       <Typography variant="h2" component="div">
         Editer l'assurance
       </Typography>
+      <div>
+    {showButton && (
+      <Button
+        onClick={validateAssurance}
+        sx={{
+          marginLeft: "200px",
+          marginRight: "-250px",
+          height: "30px",
+          marginTop: "15px",
+          backgroundColor: '#4cceac',
+        }}
+      >
+        valider
+      </Button>
+    )}
+  </div>
     </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>

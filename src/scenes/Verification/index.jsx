@@ -2,6 +2,7 @@ import {
   Box,
   useTheme,
   IconButton,
+  Button
 } from "@mui/material";
 
 
@@ -13,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Api_client } from "../../data/Api";
 
 const Verification = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -124,22 +126,45 @@ const Verification = () => {
       }
     },
 
-    {
-      field: "actions",
-      headerName: "Actions",
-      // width: "50%",
-      align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              deleteVerification(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
+
+
+
+{
+  field: "actions",
+  headerName: "Actions",
+  align: "right",
+  renderCell: (params) => {
+  if (group_name !== 'superuser') {
+  return (
+  <div>
+  <IconButton
+  onClick={() => {
+   
+  }}>
+  </IconButton>
+  
+  <IconButton
+  onClick={() => {
+  deleteVerification(params.row.id);
+  }}>
+  <DeleteIcon />
+  </IconButton>
+  </div>
+  );
+  } else {
+    return(
+      <Button
+      type="submit"
+      color="secondary"
+      variant="contained"
+      style={{ marginRight: "10px", height: "25px" }}
+      onClick={''}
+    >
+      Restore
+    </Button>);
+  }
+  },
+  },
   ];
 
   return (

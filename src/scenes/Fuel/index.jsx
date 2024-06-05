@@ -24,6 +24,7 @@ import { Api_client } from "../../data/Api";
 import CheckIcon from "@mui/icons-material/Check";
 
 const Carburant = () => {
+  const group_name = sessionStorage.getItem("group_name");
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [openModal, setopenModal] = useState(false);
@@ -41,6 +42,9 @@ const Carburant = () => {
   const [litreu, setLitreu] = useState();
   const [stationu, setStationu] = useState();
   const [coutu, setCoutu] = useState();
+  const [showButton, setShowButton] = useState(true);
+  const [showCheckIcon, setShowCheckIcon] = useState(true);
+  const [validationDate, setValidationDate] = useState(null);
   
   
   const [data, setdata] = useState([]);
@@ -121,6 +125,30 @@ const Carburant = () => {
     })
       .then((response) => {
         setisLoading(false);
+        setShowCheckIcon(false);
+        setValidationDate(new Date().toLocaleDateString());
+        setShowButton(false); 
+        fetchData();
+        console.log(response.data);
+      })
+      .catch((error) => {
+        setisLoading(false);
+      });
+  };
+
+
+  //VALIDATE
+
+  const validateCarburant= () => {
+    setisLoading(true);
+    Api_client.put(`course/carburant/${id}/`, {
+      vehicle: vehiculeu,
+      litre: litreu,
+      cout: coutu,
+      station: stationu,
+    })
+      .then((response) => {
+        setisLoading(false);
         setopenModalu(false);
         fetchData();
         console.log(response.data);
@@ -177,37 +205,51 @@ const Carburant = () => {
       flex: 1,
       cellClassName: "station-column--cell",
     },
-    
+
+
     {
       field: "actions",
       headerName: "Actions",
-      // width: "50%",
       align: "right",
-      renderCell: (params) => (
-        <div>
-          <IconButton
-            onClick={() => {
-              setopenModalu(true);
-              setid(params.row.id);
-              setVehiculeu(params.row.vehicule_id);
-              setCoutu(params.row.cout);
-              setLitreu(params.row.litre);
-              setStationu(params.row.station);
-             
-            }}>
-            <EditIcon />
-          </IconButton>
-
-          <IconButton
-            onClick={() => {
-              deleteCarburant(params.row.id);
-            }}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
+      renderCell: (params) => {
+      if (group_name !== 'superuser') {
+      return (
+      <div>
+      <IconButton
+      onClick={() => {
+        setopenModalu(true);
+        setid(params.row.id);
+        setVehiculeu(params.row.vehicule_id);
+        setCoutu(params.row.cout);
+        setLitreu(params.row.litre);
+        setStationu(params.row.station); 
+      }}>
+      <EditIcon />
+      </IconButton>
+      
+      <IconButton
+      onClick={() => {
+      deleteCarburant(params.row.id);
+      }}>
+      <DeleteIcon />
+      </IconButton>
+      </div>
+      );
+      } else {
+        return(
+          <Button
+          type="submit"
+          color="secondary"
+          variant="contained"
+          style={{ marginRight: "10px",height:"25px"}}
+          onClick={''}
+        >
+          Restore
+        </Button>);
+      }
+      },
+      },
+      ];
 
   return (
     <Box m='20px'>
@@ -222,6 +264,7 @@ const Carburant = () => {
           borderRadius: 5,
         }}>
         <Header title='CARBURANT' subtitle='Consomation des vehicules' />
+        {group_name !== 'superuser' && (
         <Button
          type="submit"
          color="secondary"
@@ -230,7 +273,7 @@ const Carburant = () => {
 
           onClick={() => setopenModal(true)}>
           Ajouter
-        </Button>
+        </Button>)}
       </Box>
       <Box
         m='40px 0 0 0'
@@ -406,6 +449,20 @@ const Carburant = () => {
       <Typography variant="h2" component="div">
         Editer les information sur Carburant
       </Typography>
+      {showButton && (
+      <Button
+        onClick={validateCarburant}
+        sx={{
+          marginLeft: "100px",
+          marginRight: "-100px",
+          height: "30px",
+          marginTop: "15px",
+          backgroundColor: '#4cceac',
+        }}
+      >
+        valider
+      </Button>
+    )}
     </Box>
           <Box margin={2}>
             <Grid container spacing={2} item xs={12} alignItems='center'>
